@@ -4,13 +4,6 @@ const _browser = chrome || browser
 let domain, cookiesList
 let tabID
 
-const CookiesListEnum = {
-	LinkedIn: {domain: ".linkedin.com", cookiesList: ["li_at"]},
-	Twitter: {domain: ".twitter.com", cookiesList: ["auth_token"]},
-	Instagram: {domain: ".instagram.com", cookiesList: ["sessionid"]},
-	Facebook: {domain: ".facebook.com", cookiesList: ["c_user", "xs"]}
-}
-
 const sendCookie = (cookies) => {
 	_browser.tabs.sendMessage(tabID, {cookies})
 }
@@ -37,8 +30,8 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 				tabID = currentTab[0].id
 				console.log("tabID = ", tabID)
 		})
-		domain = CookiesListEnum[websiteName].domain
-		cookiesList = CookiesListEnum[websiteName].cookiesList
+		domain = WebsiteEnum[websiteName].domain
+		cookiesList = WebsiteEnum[websiteName].cookiesList
 		_browser.cookies.getAll({ domain }, (cookies) => {
 			const retrievedCookies = cookiesList.map(name => cookies.filter(el => el.name === name)[0])
 			console.log("retrivedCookiesbeforesending:", retrievedCookies)

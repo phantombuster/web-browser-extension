@@ -1,32 +1,22 @@
 
 console.log("Phantombuster Extension Loaded")
 const _browser = chrome || browser
-let websiteName, websiteUrl
-
-const WebsiteEnum = {
-	LINKEDIN: {websiteName: "LinkedIn", websiteUrl: "https://www.linkedin.com/"},
-	TWITTER: {websiteName: "Twitter", websiteUrl: "https://twitter.com/"},
-	INSTAGRAM: {websiteName: "Instagram", websiteUrl: "https://www.instagram.com/"},
-	FACEBOOK: {websiteName: "Facebook", websiteUrl: "https://www.facebook.com/"}
-}
-
+let websiteName
 // create the Get Cookies button
 const createButton = () => {
 	const checkExist = setInterval(() => {
 		if (document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a")) {
 			const apiLink = document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a").href
-			let website
 			if (apiLink.includes("/linkedin")) {
-				website = "LINKEDIN"
+				websiteName = "LinkedIn"
 			} else if (apiLink.includes("/twitter")) {
-				website = "TWITTER"
+				websiteName = "Twitter"
 			} else if (apiLink.includes("/instagram")) {
-				website = "INSTAGRAM"
+				websiteName = "Instagram"
 			} else if (apiLink.includes("/facebook")) {
-				website = "FACEBOOK"
+				websiteName = "Facebook"
 			}
-			websiteName = WebsiteEnum[website].websiteName
-			websiteUrl = WebsiteEnum[website].websiteUrl
+			websiteUrl = WebsiteEnum[websiteName].websiteUrl
 
 			const btn = document.createElement("BUTTON")
 			btn.textContent = `Get cookie${websiteName === "Facebook" ? "s" : ""} from ${websiteName}`
