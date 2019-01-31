@@ -24,17 +24,16 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	if (msg.opening) {
 		_browser.cookies.onChanged.addListener(cookieChanged)
 	}
-	if (msg.websiteName) {
-		const websiteName = msg.websiteName
+	if (msg.website) {
+		const website = msg.website
 		_browser.tabs.query({ active: true, currentWindow: true }, (currentTab) => {
 				tabID = currentTab[0].id
 				console.log("tabID = ", tabID)
 		})
-		domain = WebsiteEnum[websiteName].domain
-		cookiesList = WebsiteEnum[websiteName].cookiesList
+		domain = WebsiteEnum[website].domain
+		cookiesList = WebsiteEnum[website].cookiesList
 		_browser.cookies.getAll({ domain }, (cookies) => {
 			const retrievedCookies = cookiesList.map(name => cookies.filter(el => el.name === name)[0])
-			console.log("retrivedCookiesbeforesending:", retrievedCookies)
 			sendCookie(retrievedCookies)
 		})
 	}

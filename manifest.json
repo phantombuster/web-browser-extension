@@ -12,7 +12,7 @@
     "default_locale": "en",
     "homepage_url": "http://www.phantombuster.com/",
     "background": {
-        "scripts": ["/background.js"]
+        "scripts": ["/background.js", "/data.js"]
       },
     "browser_action": {
         "default_icon": {
@@ -25,7 +25,7 @@
         {
           "matches": ["*://phantombuster.com/*"],
           "run_at": "document_end",
-          "js": ["/addbutton.js"],
+          "js": ["/addbutton.js", "/data.js"],
           "css": ["/buttonstyle.css"]
         }
       ],
