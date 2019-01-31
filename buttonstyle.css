@@ -1,0 +1,20 @@
+#pbExtensionButton {
+    color: white;
+    border: none;
+    border-radius: 12px;
+    margin-left: 5px;
+    padding: 4px
+}
+
+.button-default {
+    background-color: #35C2DB;
+}
+
+.button-success {
+    cursor: default;
+    background-color: #00B200
+}
+
+.button-failure {
+    background-color: #8B0000
+}

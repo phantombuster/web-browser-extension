@@ -25,7 +25,8 @@
         {
           "matches": ["*://phantombuster.com/*"],
           "run_at": "document_end",
-          "js": ["/addbutton.js"]
+          "js": ["/addbutton.js"],
+          "css": ["/buttonstyle.css"]
         }
       ],
       "permissions": [
