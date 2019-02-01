@@ -7,22 +7,17 @@ const createButton = () => {
 	const checkExist = setInterval(() => {
 		if (document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a")) {
 			const apiLink = document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a").href
-			if (apiLink.includes("/linkedin")) {
-				website = "LinkedIn"
-			} else if (apiLink.includes("/twitter")) {
-				website = "Twitter"
-			} else if (apiLink.includes("/instagram")) {
-				website = "Instagram"
-			} else if (apiLink.includes("/facebook")) {
-				website = "Facebook"
-			} else if (apiLink.includes("/product-hunt")) {
-				website = "ProductHunt"
+			for (const property in WebsiteEnum) {
+				if (apiLink.includes(WebsiteEnum[property].match)) {
+					website = property
+					break
+				}
 			}
 			websiteName = WebsiteEnum[website].name
 			websiteUrl = WebsiteEnum[website].websiteUrl
-
+			const cookieCount = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input").length
 			const btn = document.createElement("BUTTON")
-			btn.textContent = `Get cookie${websiteName === "Facebook" ? "s" : ""} from ${websiteName}`
+			btn.textContent = `Get Cookie${cookieCount > 1 ? "s" : ""} from ${websiteName}`
 			btn.id = "pbExtensionButton"
 			btn.classList.add("button-default")
 			btn.onclick = openConnection
@@ -47,16 +42,15 @@ const openConnection = () => {
 
 // fill the form with the correct cookie(s)
 const setCookies = (cookies) => {
-	document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] input").value = cookies[0].value
-	if (websiteName === "Facebook") {
-		document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input")[1].value = cookies[1].value
+	for (let i = 0; i < cookies.length; i++) {
+		document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input")[i].value = cookies[i].value
 	}
 	document.querySelectorAll("#pbExtensionButton").forEach(el => {
 		el.classList.add("button-success")
 		if (el.classList.contains("button-failure")) {
 			el.classList.remove("button-failure")
 		}
-		el.textContent = `${websiteName} Cookie${websiteName === "Facebook" ? "s" : ""} successfully pasted!`
+		el.textContent = `${websiteName} Cookie${cookies.length > 1 ? "s" : ""} successfully pasted!`
 	})
 }
 
