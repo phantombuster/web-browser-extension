@@ -1,21 +1,27 @@
 // background-script.js
 "use strict";
 const _browser = chrome || browser
-let domain, cookiesList
+let domain, cookiesList, website
 let tabID
+let cookiesSent = false
 
 const sendCookie = (cookies) => {
 	_browser.tabs.sendMessage(tabID, {cookies})
+	if (cookies[0]) {
+		const message = `Your ${website} ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
+		_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl:"./img/icon_128x128.png"})
+	}
 }
 
 const cookieChanged = (changeInfo) => {
 	_browser.cookies.getAll({ domain }, (cookies) => {
 		const retrievedCookies = cookiesList.map(name => cookies.filter(el => el.name === name)[0])
-		if (retrievedCookies[0]) {
+		if (retrievedCookies[0] && !cookiesSent) {
 			console.log("retrievedCookiesChanged", retrievedCookies[0])
 			console.log("tabID is still", tabID)
 			_browser.cookies.onChanged.removeListener(cookieChanged)
 			sendCookie(retrievedCookies)
+			cookiesSent = true
 		}
 	})
 }
@@ -25,7 +31,8 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 		_browser.cookies.onChanged.addListener(cookieChanged)
 	}
 	if (msg.website) {
-		const website = msg.website
+		cookiesSent = false
+		website = msg.website
 		_browser.tabs.query({ active: true, currentWindow: true }, (currentTab) => {
 				tabID = currentTab[0].id
 				console.log("tabID = ", tabID)
