@@ -1,27 +1,29 @@
 // background-script.js
-"use strict";
+"use strict"
 const _browser = chrome || browser
-let domain, cookiesList, website
+let domain
+let cookiesList
+let website
 let tabID
 let cookiesSent = false
 
 const sendCookie = (cookies) => {
 	_browser.tabs.sendMessage(tabID, {cookies})
 	if (cookies[0]) {
+		cookiesSent = true
 		const message = `Your ${website} ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
-		_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl:"./img/icon_128x128.png"})
+		_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon_128x128.png"})
 	}
 }
 
 const cookieChanged = (changeInfo) => {
-	_browser.cookies.getAll({ domain }, (cookies) => {
-		const retrievedCookies = cookiesList.map(name => cookies.filter(el => el.name === name)[0])
+	_browser.cookies.getAll({ domain }).then((cookies) => {
+		const retrievedCookies = cookiesList.map((name) => cookies.filter((el) => el.name === name)[0])
 		if (retrievedCookies[0] && !cookiesSent) {
 			console.log("retrievedCookiesChanged", retrievedCookies[0])
 			console.log("tabID is still", tabID)
 			_browser.cookies.onChanged.removeListener(cookieChanged)
 			sendCookie(retrievedCookies)
-			cookiesSent = true
 		}
 	})
 }
@@ -37,10 +39,10 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 				tabID = currentTab[0].id
 				console.log("tabID = ", tabID)
 		})
-		domain = WebsiteEnum[website].domain
-		cookiesList = WebsiteEnum[website].cookiesList
+		domain = WEBSITEENUM[website].domain
+		cookiesList = WEBSITEENUM[website].cookiesList
 		_browser.cookies.getAll({ domain }, (cookies) => {
-			const retrievedCookies = cookiesList.map(name => cookies.filter(el => el.name === name)[0])
+			const retrievedCookies = cookiesList.map((name) => cookies.filter((el) => el.name === name)[0])
 			sendCookie(retrievedCookies)
 		})
 	}

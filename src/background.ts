@@ -10,6 +10,7 @@ let cookiesSent = false
 const sendCookie = (cookies) => {
 	browser.tabs.sendMessage(tabID, {cookies})
 	if (cookies[0]) {
+		cookiesSent = true
 		const message = `Your ${website} ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
 		browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon_128x128.png"})
 	}
@@ -23,7 +24,6 @@ const cookieChanged = (changeInfo) => {
 			console.log("tabID is still", tabID)
 			browser.cookies.onChanged.removeListener(cookieChanged)
 			sendCookie(retrievedCookies)
-			cookiesSent = true
 		}
 	})
 }
@@ -35,13 +35,13 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	if (msg.website) {
 		cookiesSent = false
 		website = msg.website
-		browser.tabs.query({ active: true, currentWindow: true }).then((currentTab) => {
+		browser.tabs.query({ active: true, currentWindow: true }, (currentTab) => {
 				tabID = currentTab[0].id
 				console.log("tabID = ", tabID)
 		})
 		domain = WEBSITEENUM[website].domain
 		cookiesList = WEBSITEENUM[website].cookiesList
-		browser.cookies.getAll({ domain }).then((cookies) => {
+		browser.cookies.getAll({ domain }, (cookies) => {
 			const retrievedCookies = cookiesList.map((name) => cookies.filter((el) => el.name === name)[0])
 			sendCookie(retrievedCookies)
 		})

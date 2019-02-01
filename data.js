@@ -1,5 +1,5 @@
 // list of websites to get cookies from
-const WebsiteEnum = {
+const WEBSITEENUM = {
 	LinkedIn: {match: "/linkedin", name: "LinkedIn", domain: ".linkedin.com", websiteUrl: "https://www.linkedin.com/", cookiesList: ["li_at"]},
 	Twitter: {match: "/twitter", name: "Twitter", domain: ".twitter.com", websiteUrl: "https://twitter.com/", cookiesList: ["auth_token"]},
 	Instagram: {match: "/instagram", name: "Instagram", domain: ".instagram.com", websiteUrl: "https://www.instagram.com/", cookiesList: ["sessionid"]},

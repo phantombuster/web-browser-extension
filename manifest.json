@@ -1,38 +1,37 @@
 {
-    "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDSn5dhR3eTtYJoXe4DW2j9oFWIg71/f21Z3b6tzFva3M9xo07+xUWo9qLmyWkMeisCMhT7VNsuRbP4kIWjWFcFCi/FgtYCWwCV29CVDvj5Xv+Jzrp8znbCICaczf4ZNqCDdk3WrvSBqp1WqRqJ5q8Y7A0aoFRvMoIxqn1/u11rrwIDAQAB",
-    "manifest_version": 2,
-    "name": "Phantombuster Cookie",
-    "version": "1.0",
-    "description": "Get ALL COOKIES",
-    "icons": {
-        "16": "img/icon_16x16.png",
-        "48": "img/icon_48x48.png",
-        "128": "img/icon_128x128.png"
-    },
-    "default_locale": "en",
-    "homepage_url": "http://www.phantombuster.com/",
-    "background": {
-        "scripts": ["/background.js", "/data.js"]
-      },
-    "browser_action": {
-        "default_icon": {
-            "16": "img/icon_16x16.png",
-            "48": "img/icon_48x48.png",
-            "128": "img/icon_128x128.png"
-        }
-    },
-    "content_scripts": [
-        {
-          "matches": ["*://phantombuster.com/*"],
-          "run_at": "document_end",
-          "js": ["/addbutton.js", "/data.js"],
-          "css": ["/buttonstyle.css"]
-        }
-      ],
-      "permissions": [
-        "tabs",
-        "cookies",
-        "activeTab",
-        "<all_urls>"
-    ]
+	"manifest_version": 2,
+	"name": "Phantombuster Cookie",
+	"version": "1.0",
+	"description": "Automatically retrieve cookies for your Phantombuster APIs",
+	"icons": {
+		"16": "img/icon_16x16.png",
+		"48": "img/icon_48x48.png",
+		"128": "img/icon_128x128.png"
+	},
+	"default_locale": "en",
+	"homepage_url": "http://www.phantombuster.com/",
+	"background": {
+		"scripts": ["/background.js", "/data.js"]
+	  },
+	"browser_action": {
+		"default_icon": {
+			"16": "img/icon_16x16.png",
+			"48": "img/icon_48x48.png",
+			"128": "img/icon_128x128.png"
+		}
+	},
+	"content_scripts": [
+		{
+		  "matches": ["*://phantombuster.com/*"],
+		  "run_at": "document_end",
+		  "js": ["/main.js", "/data.js"]
+		}
+	  ],
+	  "permissions": [
+		"tabs",
+		"notifications",
+		"cookies",
+		"activeTab",
+		"<all_urls>"
+	]
 }
