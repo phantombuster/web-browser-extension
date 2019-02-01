@@ -20,8 +20,6 @@ const cookieChanged = (changeInfo) => {
 	browser.cookies.getAll({ domain }).then((cookies) => {
 		const retrievedCookies = cookiesList.map((name) => cookies.filter((el) => el.name === name)[0])
 		if (retrievedCookies[0] && !cookiesSent) {
-			console.log("retrievedCookiesChanged", retrievedCookies[0])
-			console.log("tabID is still", tabID)
 			browser.cookies.onChanged.removeListener(cookieChanged)
 			sendCookie(retrievedCookies)
 		}
@@ -37,7 +35,6 @@ browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 		website = msg.website
 		browser.tabs.query({ active: true, currentWindow: true }, (currentTab) => {
 				tabID = currentTab[0].id
-				console.log("tabID = ", tabID)
 		})
 		domain = WEBSITEENUM[website].domain
 		cookiesList = WEBSITEENUM[website].cookiesList

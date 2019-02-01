@@ -1,5 +1,4 @@
 
-console.log("Phantombuster Extension Loaded")
 const _browaser = chrome || browser
 // let website
 let websiteName
@@ -60,8 +59,6 @@ const enableButton = () => {
 
 // send the website to background to query its cookies
 const openConnection = () => {
-	console.log("opening Connection")
-	console.log("website:", website)
 	sendMessage({website})
 }
 
@@ -70,7 +67,6 @@ const listenInputChange = () => {
 }
 
 const inputChange = (event) => {
-	console.log("input change", event)
 	enableButton()
 	event.target.removeEventListener("type", inputChange, true)
 }
@@ -86,17 +82,11 @@ const setCookies = (cookies) => {
 
 // listen to messages from background
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	console.log("Message received:", message)
-	if (message.opened) {
-		console.log("We've opened the page.")
-	}
 	if (message.cookies) {
 		const cookies = message.cookies
 		if (cookies[0]) {
-			console.log("Received cookies:", cookies[0])
 			setCookies(cookies)
 		} else {
-			console.log("No cookies found!")
 			document.querySelectorAll("#pbExtensionButton").forEach((el) => {
 				el.classList.replace("btn-primary", "btn-warning")
 				el.textContent = `Please log in to ${websiteName} to get your cookie`
