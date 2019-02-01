@@ -2,6 +2,8 @@
 console.log("Phantombuster Extension Loaded")
 const _browser = chrome || browser
 let website
+let websiteName
+let websiteUrl
 // create the Get Cookies button
 const createButton = () => {
 	const checkExist = setInterval(() => {

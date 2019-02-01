@@ -3,46 +3,46 @@
 // const browser = chrome || browser
 let domain
 let cookiesList
+let website
 let tabID
-
-const COOKIESLISTENUM = {
-	LinkedIn: {domain: ".linkedin.com", cookiesList: ["li_at"]},
-	Twitter: {domain: ".twitter.com", cookiesList: ["auth_token"]},
-	Instagram: {domain: ".instagram.com", cookiesList: ["sessionid"]},
-	Facebook: {domain: ".facebook.com", cookiesList: ["c_user", "xs"]},
-}
+let cookiesSent = false
 
 const sendCookie = (cookies) => {
 	browser.tabs.sendMessage(tabID, {cookies})
+	if (cookies[0]) {
+		const message = `Your ${website} ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
+		browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon_128x128.png"})
+	}
 }
 
 const cookieChanged = (changeInfo) => {
 	browser.cookies.getAll({ domain }).then((cookies) => {
 		const retrievedCookies = cookiesList.map((name) => cookies.filter((el) => el.name === name)[0])
-		if (retrievedCookies[0]) {
+		if (retrievedCookies[0] && !cookiesSent) {
 			console.log("retrievedCookiesChanged", retrievedCookies[0])
 			console.log("tabID is still", tabID)
 			browser.cookies.onChanged.removeListener(cookieChanged)
 			sendCookie(retrievedCookies)
+			cookiesSent = true
 		}
 	})
 }
 
-browser.runtime.onMessage.addListener((msg) => {
+browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	if (msg.opening) {
 		browser.cookies.onChanged.addListener(cookieChanged)
 	}
-	if (msg.websiteName) {
-		const websiteName = msg.websiteName
+	if (msg.website) {
+		cookiesSent = false
+		website = msg.website
 		browser.tabs.query({ active: true, currentWindow: true }).then((currentTab) => {
 				tabID = currentTab[0].id
 				console.log("tabID = ", tabID)
 		})
-		domain = COOKIESLISTENUM[websiteName].domain
-		cookiesList = COOKIESLISTENUM[websiteName].cookiesList
+		domain = WEBSITEENUM[website].domain
+		cookiesList = WEBSITEENUM[website].cookiesList
 		browser.cookies.getAll({ domain }).then((cookies) => {
 			const retrievedCookies = cookiesList.map((name) => cookies.filter((el) => el.name === name)[0])
-			console.log("retrivedCookiesbeforesending:", retrievedCookies)
 			sendCookie(retrievedCookies)
 		})
 	}

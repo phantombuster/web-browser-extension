@@ -1,38 +1,24 @@
 
 console.log("Phantombuster Extension Loaded")
-// const _browser = chrome || browser
-let websiteName, websiteUrl
-
-const WebsiteEnum = {
-	LINKEDIN: {websiteName: "LinkedIn", websiteUrl: "https://www.linkedin.com/"},
-	TWITTER: {websiteName: "Twitter", websiteUrl: "https://twitter.com/"},
-	INSTAGRAM: {websiteName: "Instagram", websiteUrl: "https://www.instagram.com/"},
-	FACEBOOK: {websiteName: "Facebook", websiteUrl: "https://www.facebook.com/"}
-}
-
+// const browser = chrome || browser
+let websiteName
+let websiteUrl
 // create the Get Cookies button
 const createButton = () => {
 	const checkExist = setInterval(() => {
 		if (document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a")) {
-            const apiLinkSelector = document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a")
-            // if (apiLinkSelector) {
-                const apiLink = apiLinkSelector.getAttribute("href")
-            // }
-			let website
-			if (apiLink.indexOf("/linkedin") > -1) {
-				website = "LINKEDIN"
-			} else if (apiLink.indexOf("/twitter") > -1) {
-				website = "TWITTER"
-			} else if (apiLink.indexOf("/instagram") > -1) {
-				website = "INSTAGRAM"
-			} else if (apiLink.indexOf("/facebook") > -1) {
-				website = "FACEBOOK"
+			const apiLink = document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a").getAttribute("href")
+			for (const property in WEBSITEENUM) {
+				if (apiLink.indexOf(WEBSITEENUM[property].match) > -1) {
+					website = property
+					break
+				}
 			}
-			websiteName = WebsiteEnum[website].websiteName
-			websiteUrl = WebsiteEnum[website].websiteUrl
-
+			websiteName = WEBSITEENUM[website].name
+			websiteUrl = WEBSITEENUM[website].websiteUrl
+			const cookieCount = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input").length
 			const btn = document.createElement("BUTTON")
-			btn.textContent = `Get cookie${websiteName === "Facebook" ? "s" : ""} from ${websiteName}`
+			btn.textContent = `Get Cookie${cookieCount > 1 ? "s" : ""} from ${websiteName}`
 			btn.id = "pbExtensionButton"
 			btn.classList.add("button-default")
 			btn.onclick = openConnection
@@ -49,24 +35,23 @@ const sendMessage = (message) => {
 	browser.runtime.sendMessage(message)
 }
 
-// send the website name to background to query its cookies
+// send the website to background to query its cookies
 const openConnection = () => {
 	console.log("opening Connection")
-	sendMessage({websiteName})
+	sendMessage({website})
 }
 
 // fill the form with the correct cookie(s)
 const setCookies = (cookies) => {
-    document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] input").setAttribute("value", cookies[0].value)
-	if (websiteName === "Facebook") {
-		document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input")[1].setAttribute("value", cookies[1].value)
+	for (let i = 0; i < cookies.length; i++) {
+		document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input")[i].setAttribute("value", cookies[i].value)
 	}
 	document.querySelectorAll("#pbExtensionButton").forEach(el => {
 		el.classList.add("button-success")
 		if (el.classList.contains("button-failure")) {
 			el.classList.remove("button-failure")
 		}
-		el.textContent = `${websiteName} Cookie${websiteName === "Facebook" ? "s" : ""} successfully pasted!`
+		el.textContent = `${websiteName} Cookie${cookies.length > 1 ? "s" : ""} successfully pasted!`
 	})
 }
 
