@@ -12,7 +12,7 @@ const sendCookie = (cookies) => {
 	if (cookies[0]) {
 		cookiesSent = true
 		const message = `Your ${website} ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
-		_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon_128x128.png"})
+		_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon.png"})
 	}
 }
 

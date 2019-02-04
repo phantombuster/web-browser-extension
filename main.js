@@ -76,8 +76,11 @@ const inputChange = (event) => {
 const setCookies = (cookies) => {
 	for (let i = 0; i < cookies.length; i++) {
 		document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input")[i].value = cookies[i].value
+		document.querySelector("div[data-alpaca-field-path*=\"/spreadsheetUrl\"] input").focus()
 	}
-	disableButton(cookies.length)
+	// Array.from(document.querySelectorAll(".alpaca-message")).forEach(el => el.parentElement.removeChild(el))
+	// document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"]").classList.remove("has-error", "alpaca-invalid")
+	// document.querySelector(".alpaca-invalid").classList.remove("alpaca-invalid")
 }
 
 // listen to messages from background
