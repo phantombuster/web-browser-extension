@@ -1,6 +1,7 @@
 // background-script.js
 "use strict"
 const _browser = chrome || browser
+// var browser = require("webextension-polyfill")
 let domain
 let cookiesList
 let website
@@ -12,7 +13,7 @@ const sendCookie = (cookies) => {
 	if (cookies[0]) {
 		cookiesSent = true
 		const message = `Your ${website} ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
-		_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon.png"})
+		_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon.png", silent: true})
 	}
 }
 
@@ -26,16 +27,14 @@ const cookieChanged = (changeInfo) => {
 	})
 }
 
-_browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+_browser.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
 	if (msg.opening) {
 		_browser.cookies.onChanged.addListener(cookieChanged)
 	}
 	if (msg.website) {
 		cookiesSent = false
 		website = msg.website
-		_browser.tabs.query({ active: true, currentWindow: true }, (currentTab) => {
-				tabID = currentTab[0].id
-		})
+		tabID = sender.tab.id
 		domain = WEBSITEENUM[website].domain
 		cookiesList = WEBSITEENUM[website].cookiesList
 		_browser.cookies.getAll({ domain }, (cookies) => {

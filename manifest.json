@@ -4,29 +4,34 @@
 	"version": "1.0.0",
 	"description": "Automatically retrieve cookies for your Phantombuster APIs",
 	"icons": {
+		"48":"img/icon.png",
 		"128": "img/icon.png"
 	},
 	"homepage_url": "http://www.phantombuster.com/",
 	"background": {
-		"scripts": ["/background.js", "/data.js"]
+		"scripts": [
+			"/background.js",
+			"/data.js"
+		]
 	  },
 	"browser_action": {
 		"default_icon": {
 			"128": "img/icon.png"
-		}
+		},
+		"default_popup": "popup.html"
 	},
 	"content_scripts": [
 		{
 		  "matches": ["*://phantombuster.com/*"],
 		  "run_at": "document_end",
-		  "js": ["/main.js", "/data.js"]
+		  "js": [
+				"/main.js",
+				"/data.js"]
 		}
 	  ],
 	  "permissions": [
-		"tabs",
-		"notifications",
-		"cookies",
-		"activeTab",
-		"<all_urls>"
+			"notifications",
+			"cookies",
+			"<all_urls>"
 	]
 }

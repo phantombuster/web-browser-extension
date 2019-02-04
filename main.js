@@ -1,5 +1,6 @@
 
 const _browser = chrome || browser
+
 let website
 let websiteName
 let websiteUrl
@@ -17,7 +18,6 @@ const createPbButton = () => {
 			}
 			websiteName = WEBSITEENUM[website].name
 			websiteUrl = WEBSITEENUM[website].websiteUrl
-			const cookieCount = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input").length
 			const btn = document.createElement("BUTTON")
 			btn.id = "pbExtensionButton"
 			btn.classList.add("btn", "btn-xs", "pull-right")
@@ -81,6 +81,7 @@ const setCookies = (cookies) => {
 	// Array.from(document.querySelectorAll(".alpaca-message")).forEach(el => el.parentElement.removeChild(el))
 	// document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"]").classList.remove("has-error", "alpaca-invalid")
 	// document.querySelector(".alpaca-invalid").classList.remove("alpaca-invalid")
+	disableButton(cookies.length)
 }
 
 // listen to messages from background
