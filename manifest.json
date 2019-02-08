@@ -10,8 +10,8 @@
 	"homepage_url": "http://www.phantombuster.com/",
 	"background": {
 		"scripts": [
-			"/background.js",
-			"/data.js"
+			"/js/background.js",
+			"/js/data.js"
 		]
 	  },
 	"browser_action": {
@@ -24,8 +24,8 @@
 		  "matches": ["*://phantombuster.com/*"],
 		  "run_at": "document_end",
 		  "js": [
-				"/main.js",
-				"/data.js"]
+				"/js/main.js",
+				"/js/data.js"]
 		}
 	  ],
 	  "permissions": [

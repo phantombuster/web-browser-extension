@@ -6,7 +6,7 @@
         "noImplicitAny": false,
         "sourceMap": true,
         "rootDir": "src",
-        "outDir": "/",
+        "outDir": "js/",
         "noEmitOnError": true
     },
     "include": [
