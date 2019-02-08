@@ -31,6 +31,14 @@
 	  "permissions": [
 			"notifications",
 			"cookies",
-			"<all_urls>"
+			"*://*.phantombuster.com/*",
+			"*://*.facebook.com/*",
+			"*://*.instagram.com/*",
+			"*://*.linkedin.com/*",
+			"*://*.medium.com/*",
+			"*://*.producthunt.com/*",
+			"*://*.slack.com/*",
+			"*://*.twitter.com/*",
+			"*://*.youtube.com/*"
 	]
 }
