@@ -8,17 +8,17 @@
 		"eslint:error": "eslint --max-warnings 40 'libs/**/*.js' 'store/**/*.js' --quiet",
 		"tslint": "tslint 'libs/**/*.ts' 'store/**/*.ts'",
 		"build": "npm run tslint && tsc --diagnostics",
-		"build:watch": "tsc --watch"
+		"build:watch": "tsc --watch",
+		"zip": "zip -r phantombuster-web-extension.zip ./dist/js/data.js ./dist/js/background.js ./manifest.json ./img ./dist/js/main.js"
 	},
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
+		"@types/chrome": "0.0.78",
 		"eslint": "^5.1.0",
+		"tsc": "^1.20150623.0",
 		"tslint": "^5.12.1",
 		"typescript": "^3.2.2"
 	},
-	"dependencies": {
-		"@types/chrome": "0.0.78",
-		"@types/firefox-webext-browser": "^65.0.0"
-	}
+	"dependencies": {}
 }

@@ -1,5 +1,6 @@
 
-const _browaser = chrome || browser
+declare var browser: typeof chrome
+const _browserMain = chrome || browser
 // let website
 let websiteName
 let websiteUrl
@@ -33,7 +34,7 @@ const createButton = () => {
 
 // send a message to background script
 const sendMessage = (message) => {
-	browser.runtime.sendMessage(message)
+	_browserMain.runtime.sendMessage(message)
 }
 
 const disableButton = (cookiesLength) => {
@@ -81,7 +82,7 @@ const setCookies = (cookies) => {
 }
 
 // listen to messages from background
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+_browserMain.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.cookies) {
 		const cookies = message.cookies
 		if (cookies[0]) {
