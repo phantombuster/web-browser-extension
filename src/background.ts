@@ -28,7 +28,6 @@ const cookieChanged = (changeInfo) => {
 }
 
 _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-	console.log("msg:", msg)
 	if (msg.opening) {
 		_browser.cookies.onChanged.addListener(cookieChanged)
 	}
