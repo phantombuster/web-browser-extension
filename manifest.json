@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Phantombuster",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Automatically retrieve cookies for your Phantombuster APIs",
 	"icons": {
 		"48":"img/icon_48.png",

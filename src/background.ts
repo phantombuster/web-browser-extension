@@ -45,3 +45,6 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 		})
 	}
 })
+
+// redirecting to phantombuster.com when clicking on main icon
+_browser.browserAction.onClicked.addListener((tab) => _browser.tabs.update({ url: "https://phantombuster.com" }))
