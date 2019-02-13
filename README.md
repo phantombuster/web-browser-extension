@@ -2,7 +2,7 @@
 Session cookies handler
 
 ## Install on Google Chrome
-Find this extension on the [Chrome Web Store](https://chrome.google.com/webstore/detail/phantombuster/).
+Find this extension on the [Chrome Web Store](https://chrome.google.com/webstore/detail/phantombuster/mdlnjfcpdiaclglfbdkbleiamdafilil).
 
 ## Install on Firefox
 Find this extension on the [Firefox Add-ons site](https://addons.mozilla.org/fr/firefox/addon/phantombuster/).
