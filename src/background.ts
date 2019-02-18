@@ -8,12 +8,12 @@ let tabID
 let cookiesSent = false
 
 const sendCookie = (cookies) => {
-	console.log("sendCookie:", cookies)
 	_browser.tabs.sendMessage(tabID, {cookies})
 	if (cookies[0]) {
 		cookiesSent = true
 		const message = `Your ${website} ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
-		_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon.png"})
+		// @ts-ignore
+		_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon.png", silent: true})
 	}
 }
 
@@ -37,9 +37,7 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 		tabID = sender.tab.id
 		domain = WEBSITEENUM[website].domain
 		cookiesList = WEBSITEENUM[website].cookiesList
-		console.log("domain:", domain)
 		_browser.cookies.getAll({}, (cookies) => {
-			console.log("cookiesGet:", cookies)
 			const retrievedCookies = cookiesList.map((name) => cookies.filter((el) => el.name === name)[0])
 			sendCookie(retrievedCookies)
 		})
