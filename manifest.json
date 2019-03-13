@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Phantombuster",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Makes Phantombuster easier to use by automatically retrieving your session cookies",
 	"icons": {
 		"48":"img/icon_48.png",
@@ -39,6 +39,7 @@
 			"*://*.producthunt.com/*",
 			"*://*.slack.com/*",
 			"*://*.twitter.com/*",
+			"*://*.uber.com/*",
 			"*://*.youtube.com/*"
 	]
 }
