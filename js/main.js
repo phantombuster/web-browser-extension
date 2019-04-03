@@ -1,5 +1,6 @@
 const _browserMain = chrome || browser;
-// let website
+//@ts-ignore
+let website;
 let websiteName;
 let websiteUrl;
 // create the Get Cookies button
@@ -13,18 +14,20 @@ const createButton = () => {
                     break;
                 }
             }
-            websiteName = WEBSITEENUM[website].name;
-            websiteUrl = WEBSITEENUM[website].websiteUrl;
-            const btn = document.createElement("BUTTON");
-            btn.id = "pbExtensionButton";
-            btn.classList.add("btn", "btn-xs", "pull-right");
-            btn.onclick = openConnection;
-            if (!document.querySelector("#pbExtensionButton")) {
-                document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label").appendChild(btn);
-                document.querySelector("#pbExtensionButton").parentElement.style.display = "block";
+            if (WEBSITEENUM[website]) {
+                websiteName = WEBSITEENUM[website].name;
+                websiteUrl = WEBSITEENUM[website].websiteUrl;
+                const btn = document.createElement("BUTTON");
+                btn.id = "pbExtensionButton";
+                btn.classList.add("btn", "btn-xs", "pull-right");
+                btn.onclick = openConnection;
+                if (!document.querySelector("#pbExtensionButton")) {
+                    document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label").appendChild(btn);
+                    document.querySelector("#pbExtensionButton").parentElement.style.display = "block";
+                }
+                enableButton();
+                clearInterval(checkExist);
             }
-            enableButton();
-            clearInterval(checkExist);
         }
     }, 100);
 };

@@ -15,7 +15,9 @@ const sendCookie = (cookies) => {
 };
 const cookieChanged = (changeInfo) => {
     _browser.cookies.getAll({ domain }, (cookies) => {
-        const retrievedCookies = cookiesList.map((name) => cookies.filter((el) => el.name === name)[0]);
+        console.log("domain:", domain);
+        const retrievedCookies = cookiesList.map((cookie) => cookies.filter((el) => el.name === cookie.name && el.domain === cookie.domain)[0]);
+        console.log("retrievedCookies:", retrievedCookies);
         if (retrievedCookies[0] && !cookiesSent) {
             _browser.cookies.onChanged.removeListener(cookieChanged);
             sendCookie(retrievedCookies);
@@ -33,7 +35,9 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         domain = WEBSITEENUM[website].domain;
         cookiesList = WEBSITEENUM[website].cookiesList;
         _browser.cookies.getAll({}, (cookies) => {
-            const retrievedCookies = cookiesList.map((name) => cookies.filter((el) => el.name === name)[0]);
+            console.log("cookies:", cookies);
+            const retrievedCookies = cookiesList.map((cookie) => cookies.filter((el) => el.name === cookie.name && el.domain === cookie.domain)[0]);
+            console.log("retrievedCookies", retrievedCookies);
             sendCookie(retrievedCookies);
         });
     }

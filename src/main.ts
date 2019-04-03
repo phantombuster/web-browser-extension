@@ -1,7 +1,8 @@
 
 declare var browser: typeof chrome
 const _browserMain = chrome || browser
-// let website
+//@ts-ignore
+let website
 let websiteName
 let websiteUrl
 

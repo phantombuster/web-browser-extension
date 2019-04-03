@@ -4,7 +4,7 @@
 	"version": "1.0.4",
 	"description": "Makes Phantombuster easier to use by automatically retrieving your session cookies",
 	"icons": {
-		"48":"img/icon_48.png",
+		"48":"img/icon.png",
 		"128": "img/icon.png"
 	},
 	"homepage_url": "http://www.phantombuster.com/",
@@ -33,7 +33,9 @@
 			"cookies",
 			"*://*.phantombuster.com/*",
 			"*://*.facebook.com/*",
+			"*://github.com/*",
 			"*://*.instagram.com/*",
+			"*://*.intercom.io/*",
 			"*://*.linkedin.com/*",
 			"*://*.medium.com/*",
 			"*://*.producthunt.com/*",
