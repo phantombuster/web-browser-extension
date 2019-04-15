@@ -14,20 +14,33 @@ const createButton = () => {
                     break;
                 }
             }
-            if (WEBSITEENUM[website]) {
-                websiteName = WEBSITEENUM[website].name;
-                websiteUrl = WEBSITEENUM[website].websiteUrl;
-                const btn = document.createElement("BUTTON");
-                btn.id = "pbExtensionButton";
-                btn.classList.add("btn", "btn-xs", "pull-right");
-                btn.onclick = openConnection;
-                if (!document.querySelector("#pbExtensionButton")) {
-                    document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label").appendChild(btn);
-                    document.querySelector("#pbExtensionButton").parentElement.style.display = "block";
-                }
-                enableButton();
-                clearInterval(checkExist);
+            websiteName = WEBSITEENUM[website].name;
+            websiteUrl = WEBSITEENUM[website].websiteUrl;
+            const btn = document.createElement("BUTTON");
+            btn.id = "pbExtensionButton";
+            btn.classList.add("btn", "btn-xs", "pull-right");
+            btn.onclick = openConnection;
+            if (!document.querySelector("#pbExtensionButton")) {
+                document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label").appendChild(btn);
+                document.querySelector("#pbExtensionButton").parentElement.style.display = "block";
             }
+            enableButton();
+            clearInterval(checkExist);
+        }
+    }, 100);
+};
+const createSheetButton = () => {
+    const checkExist2 = setInterval(() => {
+        if (document.querySelector("div[data-alpaca-field-path*=\"/spreadsheetUrl\"] label a")) {
+            const sheetLink = document.createElement("a");
+            sheetLink.id = "spreadsheetLink";
+            sheetLink.textContent = "Create Google Spreadsheet";
+            sheetLink.href = "https://docs.google.com/spreadsheets/u/0/create";
+            sheetLink.setAttribute("target", "_blank");
+            sheetLink.classList.add("btn", "btn-xs", "pull-right", "btn-success", "btn-primary");
+            document.querySelector("div[data-alpaca-field-path*=\"/spreadsheetUrl\"] label").appendChild(sheetLink);
+            document.querySelector("#spreadsheetLink").parentElement.style.display = "block";
+            clearInterval(checkExist2);
         }
     }, 100);
 };
@@ -92,4 +105,5 @@ _browserMain.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 // add an event listener next to all launch buttons
 document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createButton));
+document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createSheetButton));
 //# sourceMappingURL=main.js.map

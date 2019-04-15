@@ -3,7 +3,6 @@ declare var browser: typeof chrome
 const _browser = chrome || browser
 let domain
 let cookiesList
-let website
 let tabID
 let cookiesSent = false
 
