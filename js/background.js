@@ -42,6 +42,24 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         });
     }
 });
-// redirecting to phantombuster.com when clicking on main icon
-_browser.browserAction.onClicked.addListener((tab) => _browser.tabs.update({ url: "https://phantombuster.com" }));
-//# sourceMappingURL=background.js.map
+
+const createSheetButton = () => {
+    const checkExist = setInterval(() => {
+        if (document.querySelector("div[data-alpaca-field-path*=\"/spreadsheetUrl\"] label a")) {
+			const sheetLink = document.createElement("a");
+			sheetLink.id = "spreadsheetLink";
+			sheetLink.textContent = "Create Google Spreadsheet";
+			sheetLink.href = "https://docs.google.com/spreadsheets/u/0/create";
+			sheetLink.setAttribute("target", "_blank");	
+			sheetLink.classList.add("btn", "btn-xs", "pull-right", "btn-success", "btn-primary");
+			document.querySelector("div[data-alpaca-field-path*=\"/spreadsheetUrl\"] label").appendChild(sheetLink);
+			document.querySelector("#spreadsheetLink").parentElement.style.display = "block";
+			clearInterval(checkExist);
+        }
+    }, 100);
+};
+
+// add an event listener next to all launch buttons
+document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createButton));
+document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createSheetButton));
+//# sourceMappingURL=main.js.map
