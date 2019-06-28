@@ -23,6 +23,7 @@ const createZapierButton = () => {
 		const btnId = "zapierPbExtension"
 		if (document.querySelector(zapierDropdownSelector)) {
 			isZapier = true
+			website = null
 			let apiName = document.querySelector(zapierDropdownSelector).textContent.trim()
 			apiName = apiName.split(" ").shift()
 			for (const property in WEBSITEENUM) {
@@ -31,9 +32,14 @@ const createZapierButton = () => {
 					break
 				}
 			}
+			// No need to continue when the user select a custom script
+			if (!website) {
+				return
+			}
 			websiteName = WEBSITEENUM[website].name
 			websiteUrl = WEBSITEENUM[website].websiteUrl
-			if (!document.querySelector(`#${btnId}`)) {
+			// Only inject the button when Zapier configuration loading isn't present in the page
+			if (!document.querySelector(`#${btnId}`) && document.querySelector(injectBtnLocation)) {
 				const zapBtn: HTMLElement = document.createElement("button")
 				zapBtn.id = btnId
 				zapBtn.classList.add("toggle-switch")
