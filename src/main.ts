@@ -11,8 +11,16 @@ const zapierDropdownSelector = "div.fm-field-type-fields fieldset.fm-fields div[
 const waitUntilZapierBoot = () => {
 	const idleBoot = setInterval(() => {
 		if (document.querySelector("div[role=listbox] .select-arrow")) {
-			document.querySelectorAll("div[role=listbox] .select-arrow").forEach((el) => el.addEventListener("click", createZapierButton))
-			clearInterval(idleBoot)
+			buildListeners()
+		}
+	}, 100)
+}
+
+const buildListeners = () => {
+	const idle = setInterval(() => {
+		if (document.querySelector("div.choices-container")) {
+			document.querySelector("div.choices-container").addEventListener("click", createZapierButton)
+			clearInterval(idle)
 		}
 	}, 100)
 }
@@ -34,6 +42,10 @@ const createZapierButton = () => {
 			}
 			// No need to continue when the user select a custom script
 			if (!website) {
+				const btnPresent = document.querySelector(`#${btnId}`)
+				if (btnPresent) {
+					btnPresent.remove()
+				}
 				return
 			}
 			websiteName = WEBSITEENUM[website].name
@@ -54,6 +66,7 @@ const createZapierButton = () => {
 				zapBtn.parentElement.style.position = "relative"
 			}
 			buildZapierBtnText()
+			buildListeners()
 			clearInterval(detectButton)
 		}
 	})
