@@ -1,15 +1,71 @@
-
 declare var browser: typeof chrome
 const _browserMain = chrome || browser
-//@ts-ignore
+// @ts-ignore
 let website
 let websiteName
 let websiteUrl
+
+let isZapier = false
+const zapierDropdownSelector = "div.fm-field-type-fields fieldset.fm-fields div[role=listbox]"
+
+const waitUntilZapierBoot = () => {
+	const idleBoot = setInterval(() => {
+		if (document.querySelector("div[role=listbox] .select-arrow")) {
+			document.querySelectorAll("div[role=listbox] .select-arrow").forEach((el) => el.addEventListener("click", createZapierButton))
+			clearInterval(idleBoot)
+		}
+	}, 100)
+}
+
+const createZapierButton = () => {
+	const detectButton = setInterval(() => {
+		const injectBtnLocation = "fieldset.fm-fields.child-fields-group"
+		const btnId = "zapierPbExtension"
+		if (document.querySelector(zapierDropdownSelector)) {
+			isZapier = true
+			let apiName = document.querySelector(zapierDropdownSelector).textContent.trim()
+			apiName = apiName.split(" ").shift()
+			for (const property in WEBSITEENUM) {
+				if (apiName.match(property)) {
+					website = property
+					break
+				}
+			}
+			websiteName = WEBSITEENUM[website].name
+			websiteUrl = WEBSITEENUM[website].websiteUrl
+			if (!document.querySelector(`#${btnId}`)) {
+				const zapBtn: HTMLElement = document.createElement("button")
+				zapBtn.id = btnId
+				zapBtn.classList.add("toggle-switch")
+				zapBtn.style.position = "absolute"
+				zapBtn.style.top = "5%"
+				zapBtn.style.right = "5%"
+				zapBtn.style.width = "auto"
+				zapBtn.style.height = "auto"
+				zapBtn.style.background = "#35C2DB"
+				zapBtn.style.color = "#FFF"
+				document.querySelector(injectBtnLocation).appendChild(zapBtn)
+				zapBtn.parentElement.style.position = "relative"
+			}
+			buildZapierBtnText()
+			clearInterval(detectButton)
+		}
+	})
+}
+
+const buildZapierBtnText = () => {
+	document.querySelectorAll("#zapierPbExtension").forEach((el: HTMLElement) => {
+		const cookieCount = WEBSITEENUM[website].cookiesList.length
+		el.textContent = `Get cookie${cookieCount > 1 ? "s" : "" } from ${websiteName}`
+		el.removeAttribute("disabled")
+	})
+}
 
 // create the Get Cookies button
 const createButton = () => {
 	const checkExist = setInterval(() => {
 		if (document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a")) {
+			isZapier = false
 			const apiLink = document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a").getAttribute("href")
 			for (const property in WEBSITEENUM) {
 				if (apiLink.indexOf(WEBSITEENUM[property].match) > -1) {
@@ -36,18 +92,18 @@ const createButton = () => {
 const createSheetButton = () => {
 	const checkExist2 = setInterval(() => {
 		if (document.querySelector("div[data-alpaca-field-path*=\"/spreadsheetUrl\"] label a")) {
-			const sheetLink = document.createElement("a");
-			sheetLink.id = "spreadsheetLink";
-			sheetLink.textContent = "Create Google Spreadsheet";
-			sheetLink.href = "https://docs.google.com/spreadsheets/u/0/create";
-			sheetLink.setAttribute("target", "_blank");	
-			sheetLink.classList.add("btn", "btn-xs", "pull-right", "btn-success", "btn-primary");
-			document.querySelector("div[data-alpaca-field-path*=\"/spreadsheetUrl\"] label").appendChild(sheetLink);
-			document.querySelector("#spreadsheetLink").parentElement.style.display = "block";
+			const sheetLink = document.createElement("a")
+			sheetLink.id = "spreadsheetLink"
+			sheetLink.textContent = "Create Google Spreadsheet"
+			sheetLink.href = "https://docs.google.com/spreadsheets/u/0/create"
+			sheetLink.setAttribute("target", "_blank")
+			sheetLink.classList.add("btn", "btn-xs", "pull-right", "btn-success", "btn-primary")
+			document.querySelector("div[data-alpaca-field-path*=\"/spreadsheetUrl\"] label").appendChild(sheetLink)
+			document.querySelector("#spreadsheetLink").parentElement.style.display = "block"
 			clearInterval(checkExist2)
-			}
+		}
 	}, 100)
-};
+}
 
 // send a message to background script
 const sendMessage = (message) => {
@@ -105,12 +161,16 @@ _browserMain.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		if (cookies[0]) {
 			setCookies(cookies)
 		} else {
-			document.querySelectorAll("#pbExtensionButton").forEach((el) => {
-				el.classList.replace("btn-primary", "btn-warning")
-				el.textContent = `Please log in to ${websiteName} to get your cookie`
-			})
-			window.open(websiteUrl, "_blank")
-			sendMessage({opening: websiteName})
+			if (isZapier) {
+				// ...
+			} else {
+				document.querySelectorAll("#pbExtensionButton").forEach((el) => {
+					el.classList.replace("btn-primary", "btn-warning")
+					el.textContent = `Please log in to ${websiteName} to get your cookie`
+				})
+				window.open(websiteUrl, "_blank")
+				sendMessage({opening: websiteName})
+			}
 		}
 	}
 })
@@ -118,3 +178,5 @@ _browserMain.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // add an event listener next to all launch buttons
 document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createButton))
 document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createSheetButton))
+// Need to wait until Zapier shows elements...
+waitUntilZapierBoot()
