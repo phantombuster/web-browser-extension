@@ -5,8 +5,30 @@ let website
 let websiteName
 let websiteUrl
 
-let isZapier = false
 const zapierDropdownSelector = "div.fm-field-type-fields fieldset.fm-fields div[role=listbox]"
+const zapierExtensionId = "#zapierPbExtension"
+
+const _contains = (sel: string, text: string) => Array.from(document.querySelectorAll(sel)).filter((el) => el.textContent.indexOf(text) > -1)
+
+const setCodeMirrorValue = (idx: number, value: string) => {
+	const el = document.querySelectorAll(".CodeMirror")
+	if (el[idx]) {
+		// @ts-ignore
+		console.log(idx, "\t", el.CodeMirror)
+		// @ts-ignore
+		el[idx].CodeMirror.doc.setValue(value)
+	}
+}
+
+const parentUntils = (el: HTMLElement|Element, selector: string): HTMLElement|null => {
+	if (el.classList.contains(selector)) {
+		return el as HTMLElement
+	}
+	if (el.tagName.toLowerCase() === "body") {
+		return null
+	}
+	return parentUntils(el.parentElement, selector)
+}
 
 const waitUntilZapierBoot = () => {
 	const idleBoot = setInterval(() => {
@@ -30,7 +52,6 @@ const createZapierButton = () => {
 		const injectBtnLocation = "fieldset.fm-fields.child-fields-group"
 		const btnId = "zapierPbExtension"
 		if (document.querySelector(zapierDropdownSelector)) {
-			isZapier = true
 			website = null
 			let apiName = document.querySelector(zapierDropdownSelector).textContent.trim()
 			apiName = apiName.split(" ").shift()
@@ -62,6 +83,7 @@ const createZapierButton = () => {
 				zapBtn.style.height = "auto"
 				zapBtn.style.background = "#35C2DB"
 				zapBtn.style.color = "#FFF"
+				zapBtn.onclick = openConnection
 				document.querySelector(injectBtnLocation).appendChild(zapBtn)
 				zapBtn.parentElement.style.position = "relative"
 			}
@@ -84,7 +106,6 @@ const buildZapierBtnText = () => {
 const createButton = () => {
 	const checkExist = setInterval(() => {
 		if (document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a")) {
-			isZapier = false
 			const apiLink = document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a").getAttribute("href")
 			for (const property in WEBSITEENUM) {
 				if (apiLink.indexOf(WEBSITEENUM[property].match) > -1) {
@@ -111,14 +132,16 @@ const createButton = () => {
 const createSheetButton = () => {
 	const checkExist2 = setInterval(() => {
 		if (document.querySelector("div[data-alpaca-field-path*=\"/spreadsheetUrl\"] label a")) {
-			const sheetLink = document.createElement("a")
-			sheetLink.id = "spreadsheetLink"
-			sheetLink.textContent = "Create Google Spreadsheet"
-			sheetLink.href = "https://docs.google.com/spreadsheets/u/0/create"
-			sheetLink.setAttribute("target", "_blank")
-			sheetLink.classList.add("btn", "btn-xs", "pull-right", "btn-success", "btn-primary")
-			document.querySelector("div[data-alpaca-field-path*=\"/spreadsheetUrl\"] label").appendChild(sheetLink)
-			document.querySelector("#spreadsheetLink").parentElement.style.display = "block"
+			if (!document.querySelector("#spreadsheetLink")) {
+				const sheetLink = document.createElement("a")
+				sheetLink.id = "spreadsheetLink"
+				sheetLink.textContent = "Create Google Spreadsheet"
+				sheetLink.href = "https://docs.google.com/spreadsheets/u/0/create"
+				sheetLink.setAttribute("target", "_blank")
+				sheetLink.classList.add("btn", "btn-xs", "pull-right", "btn-success", "btn-primary")
+				document.querySelector("div[data-alpaca-field-path*=\"/spreadsheetUrl\"] label").appendChild(sheetLink)
+				document.querySelector("#spreadsheetLink").parentElement.style.display = "block"
+			}
 			clearInterval(checkExist2)
 		}
 	}, 100)
@@ -166,30 +189,58 @@ const inputChange = (event) => {
 
 // fill the form with the correct cookie(s)
 const setCookies = (cookies) => {
-	for (let i = 0; i < cookies.length; i++) {
-		const inputField = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input")[i] as HTMLInputElement
-		inputField.value = cookies[i].value
+	const isZapier = document.location.hostname.indexOf("zapier.com") > -1
+
+	if (isZapier) {
+		const list = WEBSITEENUM[website].cookiesList
+		let i = 0
+		for (const one of list) {
+			sendMessage({ zapierExecute: { idx: i, value: cookies[i].value } })
+			// runOnce(setCodeMirrorValue, i, cookies[i].value)
+			// setCodeMirrorValue(i, list[i].value)
+			// const els = _contains("div.fm-label label", one.name)
+			// if (els.length) {
+			// const el = els.shift()
+			// const target = parentUntils(el as Element, "fm-field")
+			// if (target) {
+					// debugger
+					// const tmp: HTMLElement = target.querySelector(".CodeMirror")
+					// @ts-ignore
+					// tmp.CodeMirror.doc.setValue(cookies[i].value)
+			// }
+			// }
+			i++
+		}
+	} else {
+		for (let i = 0; i < cookies.length; i++) {
+			const inputField = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input")[i] as HTMLInputElement
+			inputField.value = cookies[i].value
+		}
+		disableButton(cookies.length)
 	}
-	disableButton(cookies.length)
 }
 
 // listen to messages from background
 _browserMain.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	const isZapier = document.location.hostname.indexOf("zapier.com") > -1
 	if (message.cookies) {
 		const cookies = message.cookies
 		if (cookies[0]) {
 			setCookies(cookies)
 		} else {
 			if (isZapier) {
-				// ...
-			} else {
-				document.querySelectorAll("#pbExtensionButton").forEach((el) => {
-					el.classList.replace("btn-primary", "btn-warning")
-					el.textContent = `Please log in to ${websiteName} to get your cookie`
-				})
-				window.open(websiteUrl, "_blank")
-				sendMessage({opening: websiteName})
+				console.log(message)
 			}
+			document.querySelectorAll(isZapier ? zapierExtensionId : "#pbextensionbutton").forEach((el) => {
+				if (isZapier) {
+					// ...
+				} else {
+					el.classList.replace("btn-primary", "btn-warning")
+				}
+				el.textContent = `please log in to ${websiteName} to get your cookie`
+			})
+			window.open(websiteUrl, "_blank")
+			sendMessage({opening: websiteName})
 		}
 	}
 })
