@@ -6,33 +6,12 @@ let websiteName
 let websiteUrl
 
 const zapierDropdownSelector = "div.fm-field-type-fields fieldset.fm-fields div[role=listbox]"
-const zapierExtensionId = "#zapierPbExtension"
-
-const _contains = (sel: string, text: string) => Array.from(document.querySelectorAll(sel)).filter((el) => el.textContent.indexOf(text) > -1)
-
-const setCodeMirrorValue = (idx: number, value: string) => {
-	const el = document.querySelectorAll(".CodeMirror")
-	if (el[idx]) {
-		// @ts-ignore
-		console.log(idx, "\t", el.CodeMirror)
-		// @ts-ignore
-		el[idx].CodeMirror.doc.setValue(value)
-	}
-}
-
-const parentUntils = (el: HTMLElement|Element, selector: string): HTMLElement|null => {
-	if (el.classList.contains(selector)) {
-		return el as HTMLElement
-	}
-	if (el.tagName.toLowerCase() === "body") {
-		return null
-	}
-	return parentUntils(el.parentElement, selector)
-}
+const zapierExtensionId = "button[id*=\"zapierPbExtension\"]"
 
 const waitUntilZapierBoot = () => {
 	const idleBoot = setInterval(() => {
 		if (document.querySelector("div[role=listbox] .select-arrow")) {
+			clearInterval(idleBoot)
 			buildListeners()
 		}
 	}, 100)
@@ -47,10 +26,20 @@ const buildListeners = () => {
 	}, 100)
 }
 
+const parentUntils = (el: HTMLElement, selector: string) => {
+	if (el.classList.contains(selector)) {
+		return el
+	}
+	if (el.tagName.toLowerCase() === "body") {
+		return null
+	}
+	return parentUntils(el.parentElement, selector)
+}
+
 const createZapierButton = () => {
 	const detectButton = setInterval(() => {
 		const injectBtnLocation = "fieldset.fm-fields.child-fields-group"
-		const btnId = "zapierPbExtension"
+		const btnSels = "button[id*=\"zapierPbExtension\"]"
 		if (document.querySelector(zapierDropdownSelector)) {
 			website = null
 			let apiName = document.querySelector(zapierDropdownSelector).textContent.trim()
@@ -61,45 +50,58 @@ const createZapierButton = () => {
 					break
 				}
 			}
+			// We need to remove all existing buttons when a dropdown element is selected
+			document.querySelectorAll(btnSels).forEach((el: HTMLElement) => el.remove())
 			// No need to continue when the user select a custom script
 			if (!website) {
-				const btnPresent = document.querySelector(`#${btnId}`)
-				if (btnPresent) {
-					btnPresent.remove()
-				}
 				return
 			}
 			websiteName = WEBSITEENUM[website].name
 			websiteUrl = WEBSITEENUM[website].websiteUrl
-			// Only inject the button when Zapier configuration loading isn't present in the page
-			if (!document.querySelector(`#${btnId}`) && document.querySelector(injectBtnLocation)) {
-				const zapBtn: HTMLElement = document.createElement("button")
-				zapBtn.id = btnId
-				zapBtn.classList.add("toggle-switch")
-				zapBtn.style.position = "absolute"
-				zapBtn.style.top = "5%"
-				zapBtn.style.right = "5%"
-				zapBtn.style.width = "auto"
-				zapBtn.style.height = "auto"
-				zapBtn.style.background = "#35C2DB"
-				zapBtn.style.color = "#FFF"
-				zapBtn.onclick = openConnection
-				document.querySelector(injectBtnLocation).appendChild(zapBtn)
-				zapBtn.parentElement.style.position = "relative"
-			}
-			buildZapierBtnText()
+			openConnection()
 			buildListeners()
 			clearInterval(detectButton)
 		}
 	})
 }
 
-const buildZapierBtnText = () => {
-	document.querySelectorAll("#zapierPbExtension").forEach((el: HTMLElement) => {
-		const cookieCount = WEBSITEENUM[website].cookiesList.length
-		el.textContent = `Get cookie${cookieCount > 1 ? "s" : "" } from ${websiteName}`
-		el.removeAttribute("disabled")
-	})
+const createPopUp = (rootElement: HTMLElement, id: string, cookieName: string, cookieValue: string) => {
+	rootElement.addEventListener("click", () => {
+		if (rootElement) {
+			const tmp = document.createElement("input")
+			tmp.style.display = "hidden"
+			tmp.setAttribute("value", cookieValue.trim())
+			tmp.textContent = cookieValue.trim()
+			rootElement.appendChild(tmp)
+			tmp.select()
+			const sel = document.getSelection()
+			const range = document.createRange()
+			sel.removeAllRanges()
+			range.selectNode(tmp)
+			sel.addRange(range)
+			document.execCommand("copy", false)
+			sel.removeAllRanges()
+			rootElement.remove()
+		}
+	}, false)
+}
+
+const buildCookiesPopUp = (cookies) => {
+	let i = 0
+	for (const one of cookies) {
+		const el = document.createElement("div")
+		el.id = `cookie${i}`
+		el.style.position = "absolute"
+		el.style.top = `${(i * 5) + 5}px`
+		el.style.right = "0"
+		el.style.height = "25px"
+		el.style.background = "#35C2DB"
+		el.style.padding = "5px"
+		el.textContent = `Click me to get your ${one.name} session cookie`
+		document.body.appendChild(el)
+		createPopUp(el, el.id, one.name, one.value)
+		i++
+	}
 }
 
 // create the Get Cookies button
@@ -175,7 +177,8 @@ const enableButton = () => {
 
 // send the website to background to query its cookies
 const openConnection = () => {
-	sendMessage({website})
+	const isZapier = document.location.hostname.indexOf("zapier.com") > -1
+	sendMessage({website, silence: !!isZapier })
 }
 
 const listenInputChange = () => {
@@ -187,30 +190,60 @@ const inputChange = (event) => {
 	event.target.removeEventListener("type", inputChange, true)
 }
 
+const buildCopyButton = (id: string, cookieName: string, cookieValue: string): HTMLElement => {
+	const res = document.createElement("button")
+	res.id = id
+	res.classList.add("toggle-switch")
+	res.style.position = "relative"
+	res.style.right = "0"
+	res.style.width = "auto"
+	res.style.height = "auto"
+	res.style.background = "#35C2DB"
+	res.style.color = "#FFF"
+	res.textContent = `Copy ${cookieName} cookie`
+	res.addEventListener("click", () => {
+		let tmp = res.querySelector("input")
+		const sel = document.getSelection()
+		const range = document.createRange()
+		if (!tmp) {
+			tmp = document.createElement("input")
+			tmp.style.display = "none"
+			tmp.setAttribute("value", cookieValue)
+			tmp.textContent = cookieValue
+			res.appendChild(tmp)
+		}
+		tmp.select()
+		sel.removeAllRanges()
+		range.selectNode(tmp)
+		sel.addRange(range)
+		document.execCommand("copy", false)
+		sel.removeAllRanges()
+	}, false)
+	return res
+}
+
 // fill the form with the correct cookie(s)
 const setCookies = (cookies) => {
 	const isZapier = document.location.hostname.indexOf("zapier.com") > -1
 
 	if (isZapier) {
-		const list = WEBSITEENUM[website].cookiesList
+		const injectBtnLocation = "fieldset.fm-fields.child-fields-group"
+		const btnId = "zapierPbExtension"
 		let i = 0
-		for (const one of list) {
-			sendMessage({ zapierExecute: { idx: i, value: cookies[i].value } })
-			// runOnce(setCodeMirrorValue, i, cookies[i].value)
-			// setCodeMirrorValue(i, list[i].value)
-			// const els = _contains("div.fm-label label", one.name)
-			// if (els.length) {
-			// const el = els.shift()
-			// const target = parentUntils(el as Element, "fm-field")
-			// if (target) {
-					// debugger
-					// const tmp: HTMLElement = target.querySelector(".CodeMirror")
-					// @ts-ignore
-					// tmp.CodeMirror.doc.setValue(cookies[i].value)
-			// }
-			// }
+		for (const cookie of cookies) {
+			const labels = Array.from(document.querySelectorAll(`${injectBtnLocation} label`))
+				.filter((el: HTMLElement) => el.textContent.trim().toLowerCase().indexOf(cookie.name) > -1) as HTMLElement[]
+			const btn = buildCopyButton(`${btnId}${i}`, cookie.name, cookie.value)
+			if (labels.length < 1) {
+				document.querySelector(`${injectBtnLocation} .fm-field:first-of-type .fm-label`).appendChild(btn)
+			} else {
+				const injectLocation = parentUntils(labels.shift(), "fm-label")
+				injectLocation.appendChild(btn)
+			}
 			i++
 		}
+		// buildCookiesPopUp(cookies)
+
 	} else {
 		for (let i = 0; i < cookies.length; i++) {
 			const inputField = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input")[i] as HTMLInputElement
@@ -228,19 +261,16 @@ _browserMain.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		if (cookies[0]) {
 			setCookies(cookies)
 		} else {
-			if (isZapier) {
-				console.log(message)
-			}
 			document.querySelectorAll(isZapier ? zapierExtensionId : "#pbextensionbutton").forEach((el) => {
 				if (isZapier) {
-					// ...
+					// TODO: handle this case
 				} else {
 					el.classList.replace("btn-primary", "btn-warning")
 				}
 				el.textContent = `please log in to ${websiteName} to get your cookie`
 			})
 			window.open(websiteUrl, "_blank")
-			sendMessage({opening: websiteName})
+			sendMessage({opening: websiteName })
 		}
 	}
 })
