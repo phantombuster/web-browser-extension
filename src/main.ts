@@ -17,10 +17,21 @@ const waitUntilZapierBoot = () => {
 	}, 100)
 }
 
+const waitWhileBlur = () => {
+	const blurIdle = setInterval(() => {
+		const el = document.querySelector("div.flowform")
+		if (el && !el.classList.contains("loading-needs")) {
+			clearInterval(blurIdle)
+			createZapierButton()
+		}
+	}, 100)
+}
+
 const buildListeners = () => {
 	const idle = setInterval(() => {
 		if (document.querySelector("div.choices-container")) {
-			document.querySelector("div.choices-container").addEventListener("click", createZapierButton)
+			// document.querySelector("div.choices-container").addEventListener("click", createZapierButton)
+			document.querySelector("div.choices-container").addEventListener("click", waitWhileBlur)
 			clearInterval(idle)
 		}
 	}, 100)
@@ -63,45 +74,6 @@ const createZapierButton = () => {
 			clearInterval(detectButton)
 		}
 	})
-}
-
-const createPopUp = (rootElement: HTMLElement, id: string, cookieName: string, cookieValue: string) => {
-	rootElement.addEventListener("click", () => {
-		if (rootElement) {
-			const tmp = document.createElement("input")
-			tmp.style.display = "hidden"
-			tmp.setAttribute("value", cookieValue.trim())
-			tmp.textContent = cookieValue.trim()
-			rootElement.appendChild(tmp)
-			tmp.select()
-			const sel = document.getSelection()
-			const range = document.createRange()
-			sel.removeAllRanges()
-			range.selectNode(tmp)
-			sel.addRange(range)
-			document.execCommand("copy", false)
-			sel.removeAllRanges()
-			rootElement.remove()
-		}
-	}, false)
-}
-
-const buildCookiesPopUp = (cookies) => {
-	let i = 0
-	for (const one of cookies) {
-		const el = document.createElement("div")
-		el.id = `cookie${i}`
-		el.style.position = "absolute"
-		el.style.top = `${(i * 5) + 5}px`
-		el.style.right = "0"
-		el.style.height = "25px"
-		el.style.background = "#35C2DB"
-		el.style.padding = "5px"
-		el.textContent = `Click me to get your ${one.name} session cookie`
-		document.body.appendChild(el)
-		createPopUp(el, el.id, one.name, one.value)
-		i++
-	}
 }
 
 // create the Get Cookies button
@@ -207,18 +179,24 @@ const buildCopyButton = (id: string, cookieName: string, cookieValue: string): H
 		const range = document.createRange()
 		if (!tmp) {
 			tmp = document.createElement("input")
-			tmp.style.display = "none"
+			tmp.style.position = "absolute"
+			tmp.style.opacity = "0"
 			tmp.setAttribute("value", cookieValue)
 			tmp.textContent = cookieValue
 			res.appendChild(tmp)
 		}
 		tmp.select()
-		sel.removeAllRanges()
 		range.selectNode(tmp)
+		range.selectNodeContents(tmp)
 		sel.addRange(range)
-		document.execCommand("copy", false)
+		const er = document.execCommand("copy", true)
+		if (!er) {
+			// @ts-ignore
+			navigator.clipboard.writeText(tmp.value)
+		}
 		sel.removeAllRanges()
-	}, false)
+		sel.empty()
+	})
 	return res
 }
 
