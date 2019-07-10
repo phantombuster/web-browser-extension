@@ -12,6 +12,9 @@ const waitUntilZapierBoot = () => {
 	const idleBoot = setInterval(() => {
 		if (document.querySelector("div[role=listbox] .select-arrow")) {
 			clearInterval(idleBoot)
+			if (document.querySelector("fieldset fieldset.fm-fields")) {
+				createZapierButton()
+			}
 			buildListeners()
 		}
 	}, 100)
@@ -30,7 +33,6 @@ const waitWhileBlur = () => {
 const buildListeners = () => {
 	const idle = setInterval(() => {
 		if (document.querySelector("div.choices-container")) {
-			// document.querySelector("div.choices-container").addEventListener("click", createZapierButton)
 			document.querySelector("div.choices-container").addEventListener("click", waitWhileBlur)
 			clearInterval(idle)
 		}
@@ -51,7 +53,7 @@ const createZapierButton = () => {
 	const detectButton = setInterval(() => {
 		const injectBtnLocation = "fieldset.fm-fields.child-fields-group"
 		const btnSels = "button[id*=\"zapierPbExtension\"]"
-		if (document.querySelector(zapierDropdownSelector)) {
+		if (document.querySelector(zapierDropdownSelector) && document.querySelector(injectBtnLocation)) {
 			website = null
 			let apiName = document.querySelector(zapierDropdownSelector).textContent.trim()
 			apiName = apiName.split(" ").shift()
@@ -187,6 +189,7 @@ const buildCopyButton = (id: string, cookieName: string, cookieValue: string): H
 			tmp.textContent = cookieValue
 			res.appendChild(tmp)
 		}
+		tmp.parentElement.style.background = "#35C2DB"
 		tmp.select()
 		range.selectNode(tmp)
 		range.selectNodeContents(tmp)
