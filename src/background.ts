@@ -6,6 +6,10 @@ let cookiesList
 let tabID
 let cookiesSent = false
 
+const sendNotification = (title, message) => {
+	_browser.notifications.create({ type: "basic", message, title, iconUrl: "./img/icon.png", silent: true } as NotificationOptions)
+}
+
 const sendCookie = (cookies, silence = false) => {
 	_browser.tabs.sendMessage(tabID, {cookies})
 	if (cookies[0]) {
@@ -47,6 +51,9 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 			console.log("retrievedCookies", retrievedCookies)
 			sendCookie(retrievedCookies, canSendNotif)
 		})
+	} else if (msg.notif) {
+		const { title, message } = msg.notif
+		sendNotification(title, message)
 	}
 })
 

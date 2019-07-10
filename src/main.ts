@@ -181,6 +181,8 @@ const buildCopyButton = (id: string, cookieName: string, cookieValue: string): H
 			tmp = document.createElement("input")
 			tmp.style.position = "absolute"
 			tmp.style.opacity = "0"
+			tmp.style.top = `999${Math.floor(Math.random() * Math.floor(10))}px`
+			tmp.style.right = `999${Math.floor(Math.random() * Math.floor(10))}px`
 			tmp.setAttribute("value", cookieValue)
 			tmp.textContent = cookieValue
 			res.appendChild(tmp)
@@ -194,6 +196,7 @@ const buildCopyButton = (id: string, cookieName: string, cookieValue: string): H
 			// @ts-ignore
 			navigator.clipboard.writeText(tmp.value)
 		}
+		sendMessage({ notif: { title: "Phantombuster", message: `Your ${cookieName} is copied into the clipboard`  } })
 		sel.removeAllRanges()
 		sel.empty()
 	})
@@ -239,9 +242,10 @@ _browserMain.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		if (cookies[0]) {
 			setCookies(cookies)
 		} else {
-			document.querySelectorAll(isZapier ? zapierExtensionId : "#pbextensionbutton").forEach((el) => {
+			document.querySelectorAll(isZapier ? zapierExtensionId : "#pbextensionbutton").forEach((el: HTMLElement) => {
 				if (isZapier) {
-					// TODO: handle this case
+					el.style.background = "#DC3545"
+					el.style.borderColor = "#DC3545"
 				} else {
 					el.classList.replace("btn-primary", "btn-warning")
 				}
