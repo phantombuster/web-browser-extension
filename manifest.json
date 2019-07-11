@@ -30,7 +30,6 @@
 	  ],
 	  "permissions": [
 			"activeTab",
-			"tabs",
 			"notifications",
 			"cookies",
 			"*://*.phantombuster.com/*",
