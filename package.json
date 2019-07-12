@@ -1,6 +1,6 @@
 {
 	"name": "webextensions-typescript",
-	"version": "1.0.0",
+	"version": "1.0.8",
 	"description": "Phantombuster Cookie",
 	"main": "index.js",
 	"scripts": {
@@ -9,7 +9,7 @@
 		"tslint": "tslint 'libs/**/*.ts' 'store/**/*.ts'",
 		"build": "npm run tslint && tsc --diagnostics",
 		"build:watch": "tsc --watch",
-		"zip": "zip -r phantombuster-web-extension.zip ./dist/js/data.js ./dist/js/background.js ./manifest.json ./img ./dist/js/main.js"
+		"zip": "zip -r phantombuster-web-extension.zip ./js/data.js ./js/background.js ./manifest.json ./img ./js/main.js"
 	},
 	"author": "",
 	"license": "MIT",
