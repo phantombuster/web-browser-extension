@@ -6,13 +6,19 @@ let cookiesList
 let tabID
 let cookiesSent = false
 
-const sendCookie = (cookies) => {
+const sendNotification = (title, message) => {
+	_browser.notifications.create({ type: "basic", message, title, iconUrl: "./img/icon.png", silent: true } as NotificationOptions)
+}
+
+const sendCookie = (cookies, silence = false) => {
 	_browser.tabs.sendMessage(tabID, {cookies})
 	if (cookies[0]) {
 		cookiesSent = true
-		const message = `Your ${website} ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
-		// @ts-ignore
-		_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon.png", silent: true})
+		if (!silence) {
+			const message = `Your ${website} ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
+			// @ts-ignore
+			_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon.png", silent: true})
+		}
 	}
 }
 
@@ -35,6 +41,7 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 	if (msg.website) {
 		cookiesSent = false
 		website = msg.website
+		const canSendNotif = msg.silence
 		tabID = sender.tab.id
 		domain = WEBSITEENUM[website].domain
 		cookiesList = WEBSITEENUM[website].cookiesList
@@ -42,8 +49,11 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 			console.log("cookies:", cookies)
 			const retrievedCookies = cookiesList.map((cookie) => cookies.filter((el) => el.name === cookie.name && el.domain === cookie.domain)[0])
 			console.log("retrievedCookies", retrievedCookies)
-			sendCookie(retrievedCookies)
+			sendCookie(retrievedCookies, canSendNotif)
 		})
+	} else if (msg.notif) {
+		const { title, message } = msg.notif
+		sendNotification(title, message)
 	}
 })
 

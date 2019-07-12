@@ -21,7 +21,7 @@
 	},
 	"content_scripts": [
 		{
-		  "matches": ["*://phantombuster.com/*"],
+		  "matches": ["*://phantombuster.com/*", "*://zapier.com/*"],
 		  "run_at": "document_end",
 		  "js": [
 				"/js/main.js",
@@ -29,6 +29,7 @@
 		}
 	  ],
 	  "permissions": [
+			"activeTab",
 			"notifications",
 			"cookies",
 			"*://*.phantombuster.com/*",
@@ -42,6 +43,7 @@
 			"*://*.slack.com/*",
 			"*://*.twitter.com/*",
 			"*://*.uber.com/*",
-			"*://*.youtube.com/*"
+			"*://*.youtube.com/*",
+			"*://*.zapier.com/*"
 	]
 }
