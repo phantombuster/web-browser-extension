@@ -29,7 +29,6 @@
 		}
 	  ],
 	  "permissions": [
-			"activeTab",
 			"notifications",
 			"cookies",
 			"*://*.phantombuster.com/*",
