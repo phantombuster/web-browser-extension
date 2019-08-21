@@ -42,7 +42,6 @@
 			"*://*.slack.com/*",
 			"*://*.twitter.com/*",
 			"*://*.uber.com/*",
-			"*://*.youtube.com/*",
-			"*://*.zapier.com/*"
+			"*://*.youtube.com/*"
 	]
 }
