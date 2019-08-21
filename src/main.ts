@@ -78,11 +78,35 @@ const createZapierButton = () => {
 	})
 }
 
+const refreshBtn = (evt) => {
+	const extensionBtn: HTMLElement = document.querySelector("#pbExtensionButton")
+	if (!extensionBtn) {
+		return
+	}
+	const root = parentUntils(extensionBtn, "form-group")
+	const idleChangeTimer = setInterval(() => {
+		const el = getComputedStyle(root)
+		if (el.display === "none") {
+			clearInterval(idleChangeTimer)
+			extensionBtn.parentNode.removeChild(extensionBtn)
+			createButton()
+		}
+	}, 500)
+}
+
 // create the Get Cookies button
 const createButton = () => {
 	const checkExist = setInterval(() => {
-		if (document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a")) {
-			const apiLink = document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label a").getAttribute("href")
+		const sel = "div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) label a"
+		const cookiesFieldsSelectors = "div[data-alpaca-field-path*=\"/sessionCookie\"]"
+		const select: HTMLSelectElement = document.querySelector("div[data-alpaca-field-path] select")
+		const networksCount: number = document.querySelectorAll(cookiesFieldsSelectors).length
+		// Don't overwrite onchange, we don't want to break the page
+		if (select && !select.onchange && networksCount > 1) {
+			select.onchange = refreshBtn
+		}
+		if (document.querySelector(sel)) {
+			const apiLink = document.querySelector(sel).getAttribute("href")
 			for (const property in WEBSITEENUM) {
 				if (apiLink.indexOf(WEBSITEENUM[property].match) > -1) {
 					website = property
@@ -96,7 +120,7 @@ const createButton = () => {
 			btn.classList.add("btn", "btn-xs", "pull-right")
 			btn.onclick = openConnection
 			if (!document.querySelector("#pbExtensionButton")) {
-				document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"] label").appendChild(btn)
+				document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) label").appendChild(btn)
 				document.querySelector("#pbExtensionButton").parentElement.style.display = "block"
 			}
 			enableButton()
@@ -143,7 +167,7 @@ const enableButton = () => {
 		el.classList.add("btn-primary")
 		el.classList.remove("btn-success")
 		el.classList.remove("btn-warning")
-		const cookieCount = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input").length
+		const cookieCount = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) input").length
 		el.textContent = `Get Cookie${cookieCount > 1 ? "s" : ""} from ${websiteName}`
 		el.removeAttribute("disabled")
 	})
@@ -226,11 +250,9 @@ const setCookies = (cookies) => {
 			}
 			i++
 		}
-		// buildCookiesPopUp(cookies)
-
 	} else {
 		for (let i = 0; i < cookies.length; i++) {
-			const inputField = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"] input")[i] as HTMLInputElement
+			const inputField = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) input")[i] as HTMLInputElement
 			inputField.value = cookies[i].value
 		}
 		disableButton(cookies.length)
