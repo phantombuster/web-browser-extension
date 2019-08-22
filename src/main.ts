@@ -149,7 +149,16 @@ const createSheetButton = () => {
 
 // send a message to background script
 const sendMessage = (message) => {
-	_browserMain.runtime.sendMessage(message)
+	try {
+		_browserMain.runtime.sendMessage(message)
+	} catch (err) {
+		try {
+			const port = _browserMain.runtime.connect()
+			port.postMessage(message)
+		} catch (err) {
+			// ...
+		}
+	}
 }
 
 const disableButton = (cookiesLength) => {
