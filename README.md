@@ -13,5 +13,7 @@ Find this extension on the [Chrome Web Store](https://chrome.google.com/webstore
 ## Install on Firefox
 Find this extension on the [Firefox Add-ons site](https://addons.mozilla.org/fr/firefox/addon/phantombuster/).
 
-1.0.7 changes: 
-Added support for GitHub, Intercom and Uber APIs.
+Versions changelog:
+
+[Here](https://github.com/phantombuster/web-browser-extension/releases)
+
