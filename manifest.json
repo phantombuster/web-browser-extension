@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "Phantombuster",
-	"version": "1.0.9",
+	"version": "1.0.10",
 	"description": "Makes Phantombuster easier to use by automatically retrieving your session cookies",
 	"icons": {
 		"48":"img/icon.png",
@@ -21,7 +21,7 @@
 	},
 	"content_scripts": [
 		{
-		  "matches": ["*://phantombuster.com/*", "*://zapier.com/*"],
+		  "matches": ["*://*.phantombuster.com/*", "*://zapier.com/*" ],
 		  "run_at": "document_end",
 		  "js": [
 				"/js/main.js",

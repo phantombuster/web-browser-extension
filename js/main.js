@@ -5,6 +5,22 @@ let websiteName;
 let websiteUrl;
 const zapierDropdownSelector = "div.fm-field-type-fields fieldset.fm-fields div[role=listbox]";
 const zapierExtensionId = "button[id*=\"zapierPbExtension\"]";
+const isV2InputPage = () => {
+    try {
+        return (new URL(window.location.toString())).pathname.indexOf("/setup") > -1;
+    }
+    catch (err) {
+        return false;
+    }
+};
+const isZapierPage = () => {
+    try {
+        return (new URL(window.location.toString())).hostname.indexOf("zapier") > -1;
+    }
+    catch (err) {
+        return false;
+    }
+};
 const waitUntilZapierBoot = () => {
     const idleBoot = setInterval(() => {
         if (document.querySelector("div[role=listbox] .select-arrow")) {
@@ -108,7 +124,13 @@ const createButton = () => {
             websiteUrl = WEBSITEENUM[website].websiteUrl;
             const btn = document.createElement("BUTTON");
             btn.id = "pbExtensionButton";
-            btn.classList.add("btn", "btn-xs", "pull-right");
+            const css = isV2InputPage() ? ["btn", "btn-sm", "bg-teal-2", "pull-right"] : ["btn", "btn-xs", "pull-right"];
+            if (isV2InputPage()) {
+                btn.style.borderRadius = "20px";
+                btn.style.color = "#FFF";
+                btn.style.marginBottom = "2px";
+            }
+            btn.classList.add(...css);
             btn.onclick = openConnection;
             if (!document.querySelector("#pbExtensionButton")) {
                 document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) label").appendChild(btn);
@@ -162,7 +184,9 @@ const disableButton = (cookiesLength) => {
 };
 const enableButton = () => {
     document.querySelectorAll("#pbExtensionButton").forEach((el) => {
-        el.classList.add("btn-primary");
+        if (!isV2InputPage()) {
+            el.classList.add("btn-primary");
+        }
         el.classList.remove("btn-success");
         el.classList.remove("btn-warning");
         const cookieCount = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) input").length;
@@ -275,10 +299,17 @@ _browserMain.runtime.onMessage.addListener((message, sender, sendResponse) => {
             sendMessage({ opening: websiteName });
         }
     }
+    if (message.restart) {
+        if (isV2InputPage()) {
+            createButton();
+        }
+    }
 });
 // add an event listener next to all launch buttons
 document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createButton));
 document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createSheetButton));
 // Need to wait until Zapier shows elements...
-waitUntilZapierBoot();
+if (isZapierPage()) {
+    waitUntilZapierBoot();
+}
 //# sourceMappingURL=main.js.map
