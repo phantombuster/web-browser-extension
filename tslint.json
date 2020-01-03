@@ -17,7 +17,9 @@
 		"max-line-length": [false, 150],
 		"object-literal-sort-keys": false,
 		"no-return-await": true,
-		"ignoreDefinitionFiles": false
+		"ignoreDefinitionFiles": false,
+		"cyclomatic-complexity": [ true, 5 ],
+		"no-magic-numbers": true
 	},
 	"rulesDirectory": []
 }

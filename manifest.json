@@ -13,7 +13,7 @@
 			"/js/background.js",
 			"/js/data.js"
 		]
-	  },
+	},
 	"browser_action": {
 		"default_icon": {
 			"128": "img/icon.png"
@@ -21,27 +21,29 @@
 	},
 	"content_scripts": [
 		{
-		  "matches": ["*://*.phantombuster.com/*", "*://zapier.com/*" ],
-		  "run_at": "document_end",
-		  "js": [
+			"matches": ["*://*.phantombuster.com/*", "*://zapier.com/*" ],
+			"run_at": "document_end",
+			"js": [
 				"/js/main.js",
-				"/js/data.js"]
+				"/js/data.js"
+			]
 		}
-	  ],
-	  "permissions": [
-			"notifications",
-			"cookies",
-			"*://*.phantombuster.com/*",
-			"*://*.facebook.com/*",
-			"*://github.com/*",
-			"*://*.instagram.com/*",
-			"*://*.intercom.io/*",
-			"*://*.linkedin.com/*",
-			"*://*.medium.com/*",
-			"*://*.producthunt.com/*",
-			"*://*.slack.com/*",
-			"*://*.twitter.com/*",
-			"*://*.uber.com/*",
-			"*://*.youtube.com/*"
+	],
+	"permissions": [
+		"notifications",
+		"cookies",
+		"*://*.phantombuster.com/*",
+		"*://*.facebook.com/*",
+		"*://github.com/*",
+		"*://*.instagram.com/*",
+		"*://*.intercom.io/*",
+		"*://*.linkedin.com/*",
+		"*://*.medium.com/*",
+		"*://*.producthunt.com/*",
+		"*://*.slack.com/*",
+		"*://*.twitter.com/*",
+		"*://*.uber.com/*",
+		"*://*.youtube.com/*",
+		"*://*.quora.com/*"
 	]
 }
