@@ -5,6 +5,7 @@ let website
 let websiteName
 let websiteUrl
 
+const removeFieldsBtn = "div[class*=\"extra-fields__remove\"] button"
 const zapierDropdownSelector = "div.fm-field-type-fields fieldset.fm-fields div[role=listbox]"
 const zapierExtensionId = "button[id*=\"zapierPbExtension\"]"
 
@@ -45,7 +46,7 @@ const waitWhileBlur = () => {
 		const el = document.querySelector("div.flowform")
 		if (el && !el.classList.contains("loading-needs")) {
 			clearInterval(blurIdle)
-			createZapierButton()
+			setTimeout(createZapierButton, DEF_POLL)
 		}
 	}, FAST_POLL)
 }
@@ -99,6 +100,10 @@ const createZapierButton = () => {
 	const detectButton = setInterval(() => {
 		const injectBtnLocation = "fieldset.fm-fields.child-fields-group"
 		const btnSels = zapierExtensionId
+		const rmFieldsEl = document.querySelector(removeFieldsBtn)
+		if (rmFieldsEl) {
+			rmFieldsEl.addEventListener("click", createZapierButton)
+		}
 		if (document.querySelector(zapierDropdownSelector) && document.querySelector(injectBtnLocation)) {
 			website = null
 			let apiName = document.querySelector(zapierDropdownSelector).textContent.trim()
