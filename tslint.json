@@ -18,7 +18,7 @@
 		"object-literal-sort-keys": false,
 		"no-return-await": true,
 		"ignoreDefinitionFiles": false,
-		"cyclomatic-complexity": [ true, 5 ],
+		"cyclomatic-complexity": [true, 6],
 		"no-magic-numbers": true
 	},
 	"rulesDirectory": []
