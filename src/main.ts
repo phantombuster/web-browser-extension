@@ -73,7 +73,7 @@ const parentUntils = (el: HTMLElement, selector: string): HTMLElement|null => {
 const setWebsite = (api: string, zapier = false) => {
 	for (const property in WEBSITEENUM) {
 		if (zapier) {
-			if (api.match(property)) {
+			if (api.indexOf(WEBSITEENUM[property].name) > -1) {
 				website = property
 				break
 			}
@@ -107,7 +107,9 @@ const createZapierButton = () => {
 		if (document.querySelector(zapierDropdownSelector) && document.querySelector(injectBtnLocation)) {
 			website = null
 			let apiName = document.querySelector(zapierDropdownSelector).textContent.trim()
-			apiName = apiName.split(" ").shift()
+			if (!isZapierPage()) {
+				apiName = apiName.split(" ").shift()
+			}
 			setWebsite(apiName, true)
 			// We need to remove all existing buttons when a dropdown element is selected
 			document.querySelectorAll<HTMLElement>(btnSels).forEach((el) => el.remove())
