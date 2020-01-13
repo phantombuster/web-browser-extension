@@ -1,9 +1,13 @@
 declare var browser: typeof chrome
 const _browserMain = chrome || browser
+
+/* tslint:disable-next-line:interface-over-type-literal */
+type IObject = { [key: string]: unknown }
+
 // @ts-ignore
-let website
-let websiteName
-let websiteUrl
+let website: string
+let websiteName: string
+let websiteUrl: string
 
 const removeFieldsBtn = "div[class*=\"extra-fields__remove\"] button"
 const zapierDropdownSelector = "div.fm-field-type-fields fieldset.fm-fields div[role=listbox]"
@@ -106,10 +110,7 @@ const createZapierButton = () => {
 		}
 		if (document.querySelector(zapierDropdownSelector) && document.querySelector(injectBtnLocation)) {
 			website = null
-			let apiName = document.querySelector(zapierDropdownSelector).textContent.trim()
-			if (!isZapierPage()) {
-				apiName = apiName.split(" ").shift()
-			}
+			const apiName = document.querySelector(zapierDropdownSelector).textContent.trim()
 			setWebsite(apiName, true)
 			// We need to remove all existing buttons when a dropdown element is selected
 			document.querySelectorAll<HTMLElement>(btnSels).forEach((el) => el.remove())
@@ -159,7 +160,7 @@ const createButton = () => {
 	}, FAST_POLL)
 }
 
-const refreshBtn = (evt: Event) => {
+const refreshBtn = () => {
 	const extensionBtn = document.querySelector<HTMLElement>("#pbExtensionButton")
 	if (!extensionBtn) {
 		return
@@ -194,7 +195,7 @@ const createSheetButton = () => {
 }
 
 // send a message to background script
-const sendMessage = (message) => {
+const sendMessage = (message: IObject) => {
 	try {
 		_browserMain.runtime.sendMessage(message)
 	} catch (err) {
@@ -326,7 +327,7 @@ const setCookies = (cookies) => {
 }
 
 // listen to messages from background
-_browserMain.runtime.onMessage.addListener((message, sender, sendResponse) => {
+_browserMain.runtime.onMessage.addListener((message) => {
 	if (message.cookies) {
 		const cookies = message.cookies
 		if (cookies[0]) {
