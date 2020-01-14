@@ -77,12 +77,12 @@ const parentUntils = (el: HTMLElement, selector: string): HTMLElement|null => {
 const setWebsite = (api: string, zapier = false) => {
 	for (const property in WEBSITEENUM) {
 		if (zapier) {
-			if (api.indexOf(WEBSITEENUM[property].name) > -1) {
+			if (api.toLowerCase().indexOf(WEBSITEENUM[property].name.toLowerCase()) > -1) {
 				website = property
 				break
 			}
 		} else {
-			if (api.indexOf(WEBSITEENUM[property].match) > -1) {
+			if (api.toLowerCase().indexOf(WEBSITEENUM[property].match.toLowerCase()) > -1) {
 				website = property
 				break
 			}
@@ -140,6 +140,11 @@ const createButton = () => {
 		if (document.querySelector(sel)) {
 			const apiLink = document.querySelector(sel).getAttribute("href")
 			setWebsite(apiLink)
+			// No need to continue when no website were found
+			if (!website) {
+				clearInterval(checkExist)
+				return
+			}
 			websiteName = WEBSITEENUM[website].name
 			websiteUrl = WEBSITEENUM[website].websiteUrl
 			const btn = document.createElement("BUTTON")
