@@ -38,7 +38,7 @@ const waitUntilZapierBoot = () => {
 		if (document.querySelector("div[role=listbox] .select-arrow")) {
 			clearInterval(idleBoot)
 			if (document.querySelector("fieldset fieldset.fm-fields")) {
-				createZapierButton()
+				setTimeout(createZapierButton, DEF_POLL)
 			}
 			buildListeners()
 		}
@@ -114,6 +114,7 @@ const createZapierButton = () => {
 			setWebsite(apiName, true)
 			// We need to remove all existing buttons when a dropdown element is selected
 			document.querySelectorAll<HTMLElement>(btnSels).forEach((el) => el.remove())
+			buildListeners()
 			// No need to continue when the user select a custom script
 			if (!website) {
 				clearInterval(detectButton)
@@ -122,7 +123,6 @@ const createZapierButton = () => {
 			websiteName = WEBSITEENUM[website].name
 			websiteUrl = WEBSITEENUM[website].websiteUrl
 			openConnection()
-			buildListeners()
 			clearInterval(detectButton)
 		}
 	}, FAST_POLL)
