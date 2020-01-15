@@ -116,6 +116,7 @@ const createZapierButton = () => {
 			document.querySelectorAll<HTMLElement>(btnSels).forEach((el) => el.remove())
 			// No need to continue when the user select a custom script
 			if (!website) {
+				clearInterval(detectButton)
 				return
 			}
 			websiteName = WEBSITEENUM[website].name
@@ -289,9 +290,9 @@ const buildCopyButton = (id: string, cookieName: string, cookieValue: string): H
 			// @ts-ignore
 			navigator.clipboard.writeText(tmp.value)
 		}
-		sendMessage({ notif: { title: "Phantombuster", message: `Your ${cookieName} is copied into the clipboard` } })
+		sendMessage({ notif: { title: "Phantombuster", message: `Your ${cookieName} is copied in the clipboard` } })
 		Object.assign(res.style, DEF_CSS, { background: "#5CB85C" })
-		res.textContent = `${cookieName} copied into clipboard!`
+		res.textContent = `${cookieName} copied in the clipboard!`
 		setTimeout(() => {
 			Object.assign(res.style, DEF_CSS)
 			res.textContent = DEF_TXT
