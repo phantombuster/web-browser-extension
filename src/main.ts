@@ -12,6 +12,7 @@ let websiteUrl: string
 const removeFieldsBtn = "div[class*=\"extra-fields__remove\"] button"
 const zapierDropdownSelector = "div.fm-field-type-fields fieldset.fm-fields div[role=listbox]"
 const zapierExtensionId = "button[id*=\"zapierPbExtension\"]"
+const zapierLoginPromptId = "button[id*=\"zapierPbExtensionLogin\"]"
 
 const FAST_POLL = 100
 const DEF_POLL	= 500
@@ -259,6 +260,25 @@ const displayLogin = () => {
 	})
 }
 
+const displayLoginOnZapier = () => {
+	if (document.querySelector(zapierLoginPromptId)) {
+		return
+	}
+	const DEF_CSS = { position: "relative", right: 0, width: "auto", height: "auto", background: "#35C2DB", color: "#FFF" }
+	const injectBtnLocation = "fieldset.fm-fields.child-fields-group .fm-field:first-of-type .fm-label"
+	const el = document.createElement("button")
+
+	el.textContent = `Please log into ${websiteName} to get your cookie`
+	Object.assign(el.style, DEF_CSS)
+	el.id = "zapierPbExtensionLogin"
+	el.onclick = openConnection
+
+	const entrypoint = document.querySelector(injectBtnLocation)
+	if (entrypoint) {
+		entrypoint.appendChild(el)
+	}
+}
+
 const buildCopyButton = (id: string, cookieName: string, cookieValue: string): HTMLElement => {
 	const FLOOR = 10
 	const DEF_TXT = `Copy ${cookieName} cookie`
@@ -312,6 +332,10 @@ const setCookies = (cookies) => {
 		const btnId = "zapierPbExtension"
 		let i = 0
 		for (const cookie of cookies) {
+			const loginPrompt = document.querySelector(zapierExtensionId)
+			if (loginPrompt) {
+				loginPrompt.parentElement.removeChild(loginPrompt)
+			}
 			const labels = Array.from(document.querySelectorAll<HTMLElement>(`${injectBtnLocation} label`))
 				.filter((el) => el.textContent.trim().toLowerCase().indexOf(cookie.name) > -1)
 			const btn = buildCopyButton(`${btnId}${i}`, cookie.name, cookie.value)
@@ -339,7 +363,7 @@ _browserMain.runtime.onMessage.addListener((message) => {
 		if (cookies[0]) {
 			setCookies(cookies)
 		} else {
-			displayLogin()
+			isZapierPage() ? displayLoginOnZapier() : displayLogin()
 			window.open(websiteUrl, "_blank")
 			sendMessage({opening: websiteName })
 		}
