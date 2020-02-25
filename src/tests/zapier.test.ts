@@ -143,7 +143,16 @@ const selectPhantombusterAccount = async (page: puppeteer.Page): Promise<boolean
 		await page.waitForFunction((sel) => !!document.querySelector(sel), { }, keySel)
 		await page.click(keySel)
 		await page.waitForResponse((r) => r.url().indexOf("https://zapier.com/api/v3/auths/") > -1)
+		await page.waitForFunction(() => {
+			const sel = "div.flow-detail-steps div[aria-expanded=\"true\"] > div:nth-of-type(2) div[role=\"presentation\"] button"
+			const el = document.querySelector(sel)
+			if (el) {
+				return el.getAttribute("aria-disabled") === "false"
+			}
+			return false
+		})
 	} catch (err) {
+		console.log(err)
 		return false
 	}
 	return true
