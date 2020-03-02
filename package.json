@@ -12,7 +12,8 @@
 		"zip": "zip -r phantombuster-web-extension.zip ./js/data.js ./js/background.js ./manifest.json ./img ./js/main.js",
 		"build:prod": "rimraf phantombuster-web-extension.zip && npm run build && npm run zip",
 		"test": "mocha -r ts-node/register src/tests/**/*.test.ts",
-		"test:zapier": "mocha -r ts-node/register src/tests/zapier.test.ts",
+		"test:pb": "mocha -r ts-node/register src/tests/pb.test.ts",
+		"test:zapier": "mocha -r ts-node/register src/tests/zapier.test.ts ",
 		"coverage": "nyc -r locv -e .ts -x \"*.test.ts\" npm run test"
 	},
 	"author": "",

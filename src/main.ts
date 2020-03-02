@@ -26,6 +26,8 @@ const isV2InputPage = (): boolean => {
 	}
 }
 
+const isPhantombusterPage = (): boolean => window.location.host.indexOf("phantombuster") > -1
+
 const isZapierPage = (): boolean => {
 	try {
 		return (new URL(window.location.toString())).hostname.indexOf("zapier") > -1
@@ -133,6 +135,7 @@ const createZapierButton = () => {
 const createButton = () => {
 	const checkExist = setInterval(() => {
 		const sel = "div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) label a"
+		const stepSel = "div[id*=\"formField-sessionCookie\"]"
 		const cookiesFieldsSelectors = "div[data-alpaca-field-path*=\"/sessionCookie\"]"
 		const select: HTMLSelectElement = document.querySelector("div[data-alpaca-field-path] select")
 		const networksCount: number = document.querySelectorAll(cookiesFieldsSelectors).length
@@ -162,6 +165,10 @@ const createButton = () => {
 				document.querySelector("#pbExtensionButton").parentElement.style.display = "block"
 			}
 			enableButton()
+			clearInterval(checkExist)
+		} else if (document.querySelector(stepSel)) {
+			console.log("Found cookies in new UI")
+			const element = document.querySelector(stepSel)
 			clearInterval(checkExist)
 		}
 	}, FAST_POLL)
@@ -378,6 +385,9 @@ _browserMain.runtime.onMessage.addListener((message) => {
 })
 
 const main = () => {
+	if (isPhantombusterPage()) {
+		document.body.setAttribute("data-pb-extension", "true")
+	}
 	// add an event listener next to all launch buttons
 	document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createButton))
 	document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createSheetButton))
