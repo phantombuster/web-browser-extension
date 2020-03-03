@@ -26,6 +26,14 @@ const isV2InputPage = (): boolean => {
 	}
 }
 
+const isPhantombusterUserLoggedAs = (): boolean => {
+	const loggedAsAttributeKey = "data-logged-as"
+	const bodyLoggedAsAttribute = document.body.getAttribute(loggedAsAttributeKey)
+	const rootElement = document.querySelector("div#root > div")
+	const isRootElementLoggedAs = rootElement ? rootElement.getAttribute(loggedAsAttributeKey) : ""
+	return !!bodyLoggedAsAttribute || !!isRootElementLoggedAs
+}
+
 const isPhantombusterPage = (): boolean => window.location.host.indexOf("phantombuster") > -1
 
 const isZapierPage = (): boolean => {
@@ -387,6 +395,10 @@ _browserMain.runtime.onMessage.addListener((message) => {
 const main = () => {
 	if (isPhantombusterPage()) {
 		document.body.setAttribute("data-pb-extension", "true")
+	}
+	// no need to continue if the current user is in logged as state
+	if (isPhantombusterUserLoggedAs()) {
+		return
 	}
 	// add an event listener next to all launch buttons
 	document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createButton))
