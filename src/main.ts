@@ -36,6 +36,12 @@ const isPhantombusterUserLoggedAs = (): boolean => {
 
 const isPhantombusterPage = (): boolean => window.location.host.indexOf("phantombuster") > -1
 
+const setExtensionLoadProof = () => {
+	if (isPhantombusterPage()) {
+		document.body.setAttribute("data-pb-extension", "true")
+	}
+}
+
 const isZapierPage = (): boolean => {
 	try {
 		return (new URL(window.location.toString())).hostname.indexOf("zapier") > -1
@@ -373,6 +379,7 @@ const setCookies = (cookies) => {
 
 // listen to messages from background
 _browserMain.runtime.onMessage.addListener((message) => {
+	console.log(message)
 	if (message.cookies) {
 		const cookies = message.cookies
 		if (cookies[0]) {
@@ -386,16 +393,14 @@ _browserMain.runtime.onMessage.addListener((message) => {
 
 	if (message.restart) {
 		if (isV2InputPage()) {
+			setExtensionLoadProof()
 			createButton()
 		}
 	}
-
 })
 
 const main = () => {
-	if (isPhantombusterPage()) {
-		document.body.setAttribute("data-pb-extension", "true")
-	}
+	setExtensionLoadProof()
 	// no need to continue if the current user is in logged as state
 	if (isPhantombusterUserLoggedAs()) {
 		return
