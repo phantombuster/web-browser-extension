@@ -31,6 +31,7 @@
 	],
 	"permissions": [
 		"notifications",
+		"tabs",
 		"cookies",
 		"*://*.phantombuster.com/*",
 		"*://*.facebook.com/*",

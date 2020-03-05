@@ -57,12 +57,17 @@ _browser.runtime.onMessage.addListener((msg, sender, _sendResponse) => {
 	}
 })
 
-_browser.runtime.onInstalled.addListener((info) => {
-	console.log(info)
-	// The extension will relaunch whenever it was first install or an update
-	_browser.tabs.query({}, (tabs) => {
+// The extension will relaunch whenever it was first install or an update
+_browser.runtime.onInstalled.addListener(() => {
+	const isChrome = document.location.protocol.indexOf("chrome") > -1
+	// only send signals to phantombuster & zapier pages
+	_browser.tabs.query({ url: [ "*://*.phantombuster.com/*", "*://zapier.com/*" ] }, (tabs) => {
 		for (const t of tabs) {
-			_browser.tabs.sendMessage(t.id, { restart: "restart" })
+			if (isChrome) {
+				_browser.tabs.reload(t.id)
+			} else {
+				_browser.tabs.sendMessage(t.id, { restart: "restart" })
+			}
 		}
 	})
 })
