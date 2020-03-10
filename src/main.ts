@@ -199,7 +199,6 @@ const createButton = () => {
 			}
 			const cookies = Array.from(document.querySelectorAll<HTMLDivElement>(stepSel))
 			const networks = Array.from(new Set(cookies.map((el) => el.getAttribute("data-field-info")))).filter(Boolean)
-			console.log(networks.length)
 			// Don't go any further if there are more than 1 network
 			// We won't determine which one to use
 			if (networks.length !== 1) {
