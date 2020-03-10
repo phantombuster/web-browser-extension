@@ -61,7 +61,7 @@ _browser.runtime.onMessage.addListener((msg, sender, _sendResponse) => {
 _browser.runtime.onInstalled.addListener(() => {
 	const isChrome = document.location.protocol.indexOf("chrome") > -1
 	// only send signals to phantombuster & zapier pages
-	_browser.tabs.query({ url: [ "*://*.phantombuster.com/*/setup/*", "*://zapier.com/*" ] }, (tabs) => {
+	_browser.tabs.query({ url: [ "*://*.phantombuster.com/*/setup*", "*://zapier.com/*" ] }, (tabs) => {
 		for (const t of tabs) {
 			if (isChrome) {
 				_browser.tabs.reload(t.id)

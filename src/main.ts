@@ -293,7 +293,12 @@ const enableButton = () => {
 // send the website to background to query its cookies
 const openConnection = () => sendMessage({website, silence: !!isZapierPage() })
 
-const listenInputChange = () => document.querySelector(`#${EXT_ID} ~ input`).addEventListener("input", inputChange)
+const listenInputChange = () => {
+	const el = isPhantombusterStepSetupPage() ? document.querySelector(`#${EXT_ID} ~ input`) : document.querySelector(`#${EXT_ID}`).parentElement.parentElement.querySelector("input")
+	if (el) {
+		el.addEventListener("input", inputChange)
+	}
+}
 
 const inputChange = (event: Event) => {
 	enableButton()
