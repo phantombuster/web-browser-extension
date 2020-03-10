@@ -21,7 +21,7 @@
 	},
 	"content_scripts": [
 		{
-			"matches": ["*://*.phantombuster.com/*", "*://zapier.com/*" ],
+			"matches": ["*://*.phantombuster.com/*/setup/*", "*://zapier.com/*" ],
 			"run_at": "document_end",
 			"js": [
 				"/js/main.js",

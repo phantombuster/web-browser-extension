@@ -61,7 +61,7 @@ _browser.runtime.onMessage.addListener((msg, sender, _sendResponse) => {
 _browser.runtime.onInstalled.addListener(() => {
 	const isChrome = document.location.protocol.indexOf("chrome") > -1
 	// only send signals to phantombuster & zapier pages
-	_browser.tabs.query({ url: [ "*://*.phantombuster.com/*", "*://zapier.com/*" ] }, (tabs) => {
+	_browser.tabs.query({ url: [ "*://*.phantombuster.com/*/setup/*", "*://zapier.com/*" ] }, (tabs) => {
 		for (const t of tabs) {
 			if (isChrome) {
 				_browser.tabs.reload(t.id)
@@ -75,7 +75,11 @@ _browser.runtime.onInstalled.addListener(() => {
 // redirecting to phantombuster.com when clicking on main icon
 _browser.browserAction.onClicked.addListener((_tab) => _browser.tabs.update({ url: "https://phantombuster.com" }))
 
-_browser.tabs.onUpdated.addListener((id, changeInfo) => {
+_browser.tabs.onUpdated.addListener((id, changeInfo, tab) => {
+	// Only monitor Phantombuster & Zapier tabs
+	if (!tab.url || (tab.url.indexOf("phantombuster.com") < 0 && tab.url.indexOf("zapier.com") < 0)) {
+		return
+	}
 	if (changeInfo.status && changeInfo.status === "complete") {
 		_browser.tabs.sendMessage(id, { restart: "restart" })
 	}
