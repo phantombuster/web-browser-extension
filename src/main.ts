@@ -198,24 +198,25 @@ const createButton = () => {
 				return clearInterval(checkExist)
 			}
 			const cookies = Array.from(document.querySelectorAll<HTMLDivElement>(stepSel))
-			const networks = Array.from(new Set(cookies.map((el) => el.getAttribute("data-field-info"))))
+			const networks = Array.from(new Set(cookies.map((el) => el.getAttribute("data-field-info")))).filter(Boolean)
+			console.log(networks.length)
 			// Don't go any further if there are more than 1 network
 			// We won't determine which one to use
-			if (networks.length > 1) {
-				clearInterval(checkExist)
+			if (networks.length !== 1) {
+				return clearInterval(checkExist)
 			}
 			const network = networks[0].toLowerCase()
 			const btn = buildPhantombusterButton()
 			setWebsite(network, true)
 			if (!website) {
-				clearInterval(checkExist)
+				return clearInterval(checkExist)
 			}
 			websiteName = WEBSITEENUM[website].name
 			websiteUrl = WEBSITEENUM[website].websiteUrl
 			cookies[0].style.display = "block"
 			cookies[0].prepend(btn)
 			enableButton()
-			clearInterval(checkExist)
+			return clearInterval(checkExist)
 		}
 	}, FAST_POLL)
 }
