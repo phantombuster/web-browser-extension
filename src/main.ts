@@ -10,22 +10,13 @@ let websiteName: string
 let websiteUrl: string
 
 const removeFieldsBtn = "div[class*=\"extra-fields__remove\"] button"
-const zapierDropdownSelector = "div.fm-field-type-fields fieldset.fm-fields div[role=listbox]"
+const zapierDropdownSelector = "div[class*=\"FieldsForm\"] div[class*=\"Dropdown\"]:first-of-type button[type=\"button\"]"
 const zapierExtensionId = "button[id*=\"zapierPbExtension\"]"
 const zapierLoginPromptId = "button[id*=\"zapierPbExtensionLogin\"]"
-
 const EXT_ID = "pbExtensionButton"
 const FAST_POLL = 100
 const DEF_POLL	= 500
 const CUSTOM_POLL = 2500
-
-const isV2InputPage = (): boolean => {
-	try {
-		return (new URL(window.location.toString())).pathname.indexOf("/setup") > -1
-	} catch (err) {
-		return false
-	}
-}
 
 const isPhantombusterUserLoggedAs = (): boolean => {
 	const loggedAsAttributeKey = "data-logged-as"
@@ -36,14 +27,14 @@ const isPhantombusterUserLoggedAs = (): boolean => {
 }
 
 const isPhantombusterPage = (): boolean => window.location.host.indexOf("phantombuster") > -1
+const isPhantombusterStepSetupPage = (): boolean => isPhantombusterPage() && window.location.pathname.indexOf("/setup/step") > -1
+const isV2InputPage = (): boolean => isPhantombusterPage() && window.location.pathname.indexOf("/setup") > -1
 
 const setExtensionLoadProof = () => {
 	if (isPhantombusterPage()) {
 		document.body.setAttribute("data-pb-extension", "true")
 	}
 }
-
-const isPhantombusterStepSetupPage = (): boolean => isPhantombusterPage() && window.location.pathname.indexOf("/setup/step") > -1
 
 const isZapierPage = (): boolean => {
 	try {
@@ -55,13 +46,11 @@ const isZapierPage = (): boolean => {
 
 const waitUntilZapierBoot = () => {
 	const idleBoot = setInterval(() => {
-		if (document.querySelector("div[role=listbox]")) {
+		if (document.querySelector("fieldset[class*=\"Fields\"]")) {
 			clearInterval(idleBoot)
-			if (document.querySelector("fieldset[class*=\"Fields\"]")) {
-				setTimeout(createZapierButton, DEF_POLL)
-			}
-			buildListeners()
+			setTimeout(createZapierButton, DEF_POLL)
 		}
+		buildListeners()
 	}, FAST_POLL)
 }
 
@@ -77,21 +66,27 @@ const waitWhileBlur = () => {
 
 const buildListeners = () => {
 	const idle = setInterval(() => {
-		if (document.querySelector("div.choices-container")) {
-			document.querySelector("div.choices-container").addEventListener("click", waitWhileBlur)
+		if (document.querySelector("div[class*=\"FloatingMenu\"]")) {
+			document.querySelector("div[class*=\"FloatingMenu\"]").addEventListener("click", waitWhileBlur)
 			clearInterval(idle)
 		}
 	}, FAST_POLL)
 }
 
-const parentUntils = (el: HTMLElement, selector: string): HTMLElement|null => {
-	if (el.classList.contains(selector)) {
-		return el
+const parentUntils = (el: HTMLElement, selector: string, regex?: boolean): HTMLElement|null => {
+	if (regex) {
+		if (el.className.indexOf(selector) > -1) {
+			return el
+		}
+	} else {
+		if (el.classList.contains(selector)) {
+			return el
+		}
 	}
 	if (el.tagName.toLowerCase() === "body") {
 		return null
 	}
-	return parentUntils(el.parentElement, selector)
+	return parentUntils(el.parentElement, selector, regex)
 }
 
 const setWebsite = (api: string, zapier = false) => {
@@ -291,7 +286,7 @@ const enableButton = () => {
 }
 
 // send the website to background to query its cookies
-const openConnection = () => sendMessage({website, silence: !!isZapierPage() })
+const openConnection = () => sendMessage({ website, silence: !!isZapierPage() })
 
 const listenInputChange = () => {
 	const el = isPhantombusterStepSetupPage() ? document.querySelector(`#${EXT_ID} ~ input`) : document.querySelector(`#${EXT_ID}`).parentElement.parentElement.querySelector("input")
@@ -321,13 +316,18 @@ const displayLoginOnZapier = () => {
 		return
 	}
 	const DEF_CSS = { position: "relative", right: 0, width: "auto", height: "auto", background: "#35C2DB", color: "#FFF" }
-	const injectBtnLocation = "fieldset.fm-fields.child-fields-group .fm-field:first-of-type .fm-label"
+	const injectBtnLocation = "fieldset[class*=\"Fields\"] div[class*=\"Field\"]:first-of-type"
 	const el = document.createElement("button")
 
 	el.textContent = `Please log into ${websiteName} to get your cookie`
 	Object.assign(el.style, DEF_CSS)
+	el.classList.add("toggle-switch")
 	el.id = "zapierPbExtensionLogin"
-	el.onclick = openConnection
+	el.type = "button"
+	el.onclick = () => {
+		window.open(websiteUrl, "_blank")
+		sendMessage({ opening: websiteName })
+	}
 
 	const entrypoint = document.querySelector(injectBtnLocation)
 	if (entrypoint) {
@@ -342,6 +342,7 @@ const buildCopyButton = (id: string, cookieName: string, cookieValue: string): H
 	const DEF_CSS = { position: "relative", right: 0, width: "auto", height: "auto", background: "#35C2DB", color: "#FFF" }
 	const res = document.createElement("button")
 	res.id = id
+	res.type = "button"
 	res.classList.add("toggle-switch")
 	Object.assign(res.style, DEF_CSS)
 	res.textContent = DEF_TXT
@@ -382,11 +383,11 @@ const buildCopyButton = (id: string, cookieName: string, cookieValue: string): H
 // fill the form with the correct cookie(s)
 const setCookies = (cookies) => {
 	if (isZapierPage()) {
-		const injectBtnLocation = "fieldset.fm-fields.child-fields-group"
+		const injectBtnLocation = "fieldset[class*=\"Fields\"]"
 		const btnId = "zapierPbExtension"
 		let i = 0
 		for (const cookie of cookies) {
-			const loginPrompt = document.querySelector(zapierExtensionId)
+			const loginPrompt = document.querySelector(zapierLoginPromptId)
 			if (loginPrompt) {
 				loginPrompt.parentElement.removeChild(loginPrompt)
 			}
@@ -394,9 +395,13 @@ const setCookies = (cookies) => {
 				.filter((el) => el.textContent.trim().toLowerCase().indexOf(cookie.name) > -1)
 			const btn = buildCopyButton(`${btnId}${i}`, cookie.name, cookie.value)
 			if (labels.length < 1) {
-				document.querySelector(`${injectBtnLocation} .fm-field:first-of-type .fm-label`).appendChild(btn)
+				document.querySelector(`${injectBtnLocation} div[class*=\"Field\"]:first-of-type label`).appendChild(btn)
 			} else {
-				const injectLocation = parentUntils(labels.shift(), "fm-label")
+				const injectLocation = parentUntils(labels.shift(), "FieldsForm", true)
+				const alreadyInDOM = document.querySelector(`#${btn.id}`)
+				if (alreadyInDOM) {
+					alreadyInDOM.parentElement.removeChild(alreadyInDOM)
+				}
 				injectLocation.appendChild(btn)
 			}
 			i++
@@ -422,13 +427,19 @@ _browserMain.runtime.onMessage.addListener((message) => {
 		if (cookies[0]) {
 			setCookies(cookies)
 		} else {
-			isZapierPage() ? displayLoginOnZapier() : displayLogin()
+			if (isZapierPage()) {
+				return displayLoginOnZapier()
+			}
+			displayLogin()
 			window.open(websiteUrl, "_blank")
-			sendMessage({opening: websiteName })
+			sendMessage({ opening: websiteName })
 		}
 	}
 
 	if (message.restart) {
+		if (isPhantombusterUserLoggedAs()) {
+			return
+		}
 		if (isV2InputPage()) {
 			setExtensionLoadProof()
 			createButton()
