@@ -407,7 +407,7 @@ const setCookies = (cookies) => {
 			i++
 		}
 	} else {
-		const sel = isPhantombusterStepSetupPage() ? "div[data-field-info] input" : "div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) input"
+		const sel = isPhantombusterStepSetupPage() ? `div[data-field-info=${websiteName.toLowerCase()}] input` : "div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) input"
 		for (let i = 0; i < cookies.length; i++) {
 			const inputField = document.querySelectorAll<HTMLInputElement>(sel)[i]
 			inputField.value = cookies[i].value
