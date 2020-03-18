@@ -159,8 +159,8 @@ const selectPhantombusterAccount = async (page: puppeteer.Page): Promise<boolean
 }
 
 const getPhantomChoice = (baseSel: string, phantomName: string): number|null => {
-	const sel = `${baseSel} div.choices-container ul li.choice`
-	const nameSel = "span.choice-label span span"
+	const sel = `${baseSel} div[class*=\"Option\"]`
+	const nameSel = "label[class*=\"FormLabel\"] p[class*=\"Text\"]:first-of-type"
 	const idx = Array.from(document.querySelectorAll(sel)).findIndex((el) => {
 		const tmp = el.querySelector(nameSel)
 		if (tmp && tmp.textContent) {
@@ -175,27 +175,28 @@ const testOnePhantom = async (page: puppeteer.Page, phantom: string, firstUse = 
 	const baseSel = "div.flow-detail-steps div[aria-expanded=\"true\"] > div:nth-of-type(2) div[role=\"presentation\"]"
 	const nextSel = `${baseSel} button[aria-disabled=false]`
 	const mainSel = `${baseSel} div.flowform`
-	const ddSel = `${mainSel} fieldset:first-of-type div[role=listbox] div`
-	const phantomDropdown = `${mainSel} fieldset:first-of-type div[role=listbox]`
+	const ddSel = `${baseSel} div[class*=\"Dropdown\"] button[type=button]`
+	const phantomDropdown = `${mainSel} div[class*=\"optionsContainer\"]`
 	const OK = 200
+	const TIME = 5000
 
 	try {
 		if (firstUse) {
 			await page.click(nextSel)
 			await page.waitForSelector(mainSel, { visible: true })
 		}
-		await page.waitForSelector(`${baseSel} fieldset:first-of-type div[role=listbox]`, { visible: true })
+		await page.waitForSelector(ddSel, { visible: true })
 		await page.click(ddSel)
-		await page.waitForSelector(`${ddSel} input`, { visible: true })
-		await page.type(`${ddSel} input`, phantom)
-		// await page.waitForResponse((r) => r.url().indexOf("/samples/list_api?") > -1)
+		await page.waitForSelector("div[class*=\"searchContainer\"]", { visible: true })
+		await page.type("div[class*=\"searchContainer\"] input", phantom)
+		await page.waitFor(TIME) // TODO: find a reliable way to wait Zapier...
 		const choice = await page.evaluate(getPhantomChoice, phantomDropdown, phantom)
 		assert(typeof choice === "number", `We can't find the ${phantom} with the current Phantombuster API key`)
-		await page.click(`${phantomDropdown} ul li.choice:nth-of-type(${choice + 1}) a`)
+		await page.click(`${phantomDropdown} div[class*=\"Option\"]:nth-of-type(${choice + 1})`)
 		const r = await page.waitForResponse((resp) => resp.url().indexOf("/needs") > -1)
 		assert(r.status() === OK, `We can't find the ${phantom} configuration schema`)
 		await Promise.all([
-			page.waitForSelector(`${mainSel} fieldset.child-fields-group`, { visible: true }),
+			page.waitForSelector(`${mainSel} fieldset[class*=\"Fields\"]`, { visible: true }),
 			page.waitForSelector("button[id*=\"zapierPbExtension\"]", { visible: true }),
 		])
 	} catch (err) {

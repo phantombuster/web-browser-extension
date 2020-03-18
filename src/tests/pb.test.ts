@@ -142,19 +142,22 @@ const gotoAgent = async (_page: puppeteer.Page, agent: IAgentOutput): Promise<bo
 	}
 
 	try {
-		await page.goto(navUrl)
-		await _page.waitForSelector("div#alpaca-form,div#brace-editor", { visible: true })
-		const isJSON = await _page.$("div#brace-editor")
-		if (!!isJSON) {
-			const switchSel = "li[analyticsid=\"agentSetupInputEditorSwitchLink\"]"
-			await _page.click("svg.dropdown")
-			await _page.waitForSelector(switchSel, { visible: true })
-			await _page.click(switchSel)
+		await _page.goto(navUrl)
+		await _page.waitForSelector("div#alpaca-form,div#brace-editor,div[id*=\"formField\"]", { visible: true, timeout: 7500 })
+		if (_page.url().indexOf("/step/") < 0) {
+			const isJSON = await _page.$("div#brace-editor")
+			if (!!isJSON) {
+				const switchSel = "li[analyticsid=\"agentSetupInputEditorSwitchLink\"]"
+				await _page.click("svg.dropdown")
+				await _page.waitForSelector(switchSel, { visible: true })
+				await _page.click(switchSel)
+			}
 		}
 		await _page.waitForSelector("#pbExtensionButton", { visible: true })
 		const network = await page.evaluate(getNetworkFromExtButton)
 		assert(agent.script.toLowerCase().indexOf(network) > -1, `Extension gives cookies from ${network} for ${agent.script}`)
 	} catch (err) {
+		console.log(err)
 		return false
 	}
 	await page.goBack()
