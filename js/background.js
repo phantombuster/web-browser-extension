@@ -17,7 +17,7 @@ const sendCookie = (cookies, silence = false) => {
         }
     }
 };
-const cookieChanged = (changeInfo) => {
+const cookieChanged = () => {
     _browser.cookies.getAll({ domain }, (cookies) => {
         console.log("domain:", domain);
         const retrievedCookies = cookiesList.map((cookie) => cookies.filter((el) => el.name === cookie.name && el.domain === cookie.domain)[0]);
@@ -28,7 +28,7 @@ const cookieChanged = (changeInfo) => {
         }
     });
 };
-_browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+_browser.runtime.onMessage.addListener((msg, sender, _sendResponse) => {
     if (msg.opening) {
         _browser.cookies.onChanged.addListener(cookieChanged);
     }
@@ -51,9 +51,28 @@ _browser.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendNotification(title, message);
     }
 });
+// The extension will relaunch whenever it was first install or an update
+_browser.runtime.onInstalled.addListener(() => {
+    const isChrome = document.location.protocol.indexOf("chrome") > -1;
+    // only send signals to phantombuster & zapier pages
+    _browser.tabs.query({ url: ["*://*.phantombuster.com/*", "*://zapier.com/*"] }, (tabs) => {
+        for (const t of tabs) {
+            if (isChrome) {
+                _browser.tabs.reload(t.id);
+            }
+            else {
+                _browser.tabs.sendMessage(t.id, { restart: "restart" });
+            }
+        }
+    });
+});
 // redirecting to phantombuster.com when clicking on main icon
-_browser.browserAction.onClicked.addListener((tab) => _browser.tabs.update({ url: "https://phantombuster.com" }));
-_browser.tabs.onUpdated.addListener((id, changeInfo) => {
+_browser.browserAction.onClicked.addListener((_tab) => _browser.tabs.update({ url: "https://phantombuster.com" }));
+_browser.tabs.onUpdated.addListener((id, changeInfo, tab) => {
+    // Only monitor Phantombuster & Zapier tabs
+    if (!tab.url || (tab.url.indexOf("phantombuster.com") < 0 && tab.url.indexOf("zapier.com") < 0)) {
+        return;
+    }
     if (changeInfo.status && changeInfo.status === "complete") {
         _browser.tabs.sendMessage(id, { restart: "restart" });
     }

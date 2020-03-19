@@ -70,3 +70,4 @@ node_modules/
 .vscode
 *.map
 *.zip
+js/

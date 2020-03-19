@@ -3,17 +3,27 @@ const _browserMain = chrome || browser;
 let website;
 let websiteName;
 let websiteUrl;
-const zapierDropdownSelector = "div.fm-field-type-fields fieldset.fm-fields div[role=listbox]";
+const removeFieldsBtn = "div[class*=\"extra-fields__remove\"] button";
+const zapierDropdownSelector = "div[class*=\"FieldsForm\"] div[class*=\"Dropdown\"]:first-of-type button[type=\"button\"]";
 const zapierExtensionId = "button[id*=\"zapierPbExtension\"]";
+const zapierLoginPromptId = "button[id*=\"zapierPbExtensionLogin\"]";
+const EXT_ID = "pbExtensionButton";
 const FAST_POLL = 100;
 const DEF_POLL = 500;
 const CUSTOM_POLL = 2500;
-const isV2InputPage = () => {
-    try {
-        return (new URL(window.location.toString())).pathname.indexOf("/setup") > -1;
-    }
-    catch (err) {
-        return false;
+const isPhantombusterUserLoggedAs = () => {
+    const loggedAsAttributeKey = "data-logged-as";
+    const bodyLoggedAsAttribute = document.body.getAttribute(loggedAsAttributeKey);
+    const rootElement = document.querySelector("div#root > div");
+    const isRootElementLoggedAs = rootElement ? rootElement.getAttribute(loggedAsAttributeKey) : "";
+    return !!bodyLoggedAsAttribute || !!isRootElementLoggedAs;
+};
+const isPhantombusterPage = () => window.location.host.indexOf("phantombuster") > -1;
+const isPhantombusterStepSetupPage = () => isPhantombusterPage() && window.location.pathname.indexOf("/setup/step") > -1;
+const isV2InputPage = () => isPhantombusterPage() && window.location.pathname.indexOf("/setup") > -1;
+const setExtensionLoadProof = () => {
+    if (isPhantombusterPage()) {
+        document.body.setAttribute("data-pb-extension", "true");
     }
 };
 const isZapierPage = () => {
@@ -26,13 +36,11 @@ const isZapierPage = () => {
 };
 const waitUntilZapierBoot = () => {
     const idleBoot = setInterval(() => {
-        if (document.querySelector("div[role=listbox] .select-arrow")) {
+        if (document.querySelector("fieldset[class*=\"Fields\"]")) {
             clearInterval(idleBoot);
-            if (document.querySelector("fieldset fieldset.fm-fields")) {
-                createZapierButton();
-            }
-            buildListeners();
+            setTimeout(createZapierButton, DEF_POLL);
         }
+        buildListeners();
     }, FAST_POLL);
 };
 const waitWhileBlur = () => {
@@ -40,37 +48,44 @@ const waitWhileBlur = () => {
         const el = document.querySelector("div.flowform");
         if (el && !el.classList.contains("loading-needs")) {
             clearInterval(blurIdle);
-            createZapierButton();
+            setTimeout(createZapierButton, DEF_POLL);
         }
     }, FAST_POLL);
 };
 const buildListeners = () => {
     const idle = setInterval(() => {
-        if (document.querySelector("div.choices-container")) {
-            document.querySelector("div.choices-container").addEventListener("click", waitWhileBlur);
+        if (document.querySelector("div[class*=\"FloatingMenu\"]")) {
+            document.querySelector("div[class*=\"FloatingMenu\"]").addEventListener("click", waitWhileBlur);
             clearInterval(idle);
         }
     }, FAST_POLL);
 };
-const parentUntils = (el, selector) => {
-    if (el.classList.contains(selector)) {
-        return el;
+const parentUntils = (el, selector, regex) => {
+    if (regex) {
+        if (el.className.indexOf(selector) > -1) {
+            return el;
+        }
+    }
+    else {
+        if (el.classList.contains(selector)) {
+            return el;
+        }
     }
     if (el.tagName.toLowerCase() === "body") {
         return null;
     }
-    return parentUntils(el.parentElement, selector);
+    return parentUntils(el.parentElement, selector, regex);
 };
 const setWebsite = (api, zapier = false) => {
     for (const property in WEBSITEENUM) {
         if (zapier) {
-            if (api.match(property)) {
+            if (api.toLowerCase().indexOf(WEBSITEENUM[property].name.toLowerCase()) > -1) {
                 website = property;
                 break;
             }
         }
         else {
-            if (api.indexOf(WEBSITEENUM[property].match) > -1) {
+            if (api.toLowerCase().indexOf(WEBSITEENUM[property].match.toLowerCase()) > -1) {
                 website = property;
                 break;
             }
@@ -83,26 +98,46 @@ const setSelectListenerIfNeeded = (el, networksCount) => {
         el.onchange = refreshBtn;
     }
 };
+const buildPhantombusterButton = () => {
+    const el = document.createElement("button");
+    el.id = EXT_ID;
+    const style = getPredefinedCSS();
+    if (isV2InputPage()) {
+        Object.assign(el.style, { borderRadius: "20px", color: "#FFF", marginBottom: "2px" });
+    }
+    el.onclick = openConnection;
+    el.classList.add(...style);
+    if (isPhantombusterStepSetupPage()) {
+        el.type = "button";
+        el.classList.remove("btn-sm");
+        Object.assign(el.style, { float: "right" });
+    }
+    return el;
+};
 /* END UTILS */
 const createZapierButton = () => {
     const detectButton = setInterval(() => {
-        const injectBtnLocation = "fieldset.fm-fields.child-fields-group";
+        const injectBtnLocation = "fieldset[class*=\"Fields\"]";
         const btnSels = zapierExtensionId;
+        const rmFieldsEl = document.querySelector(removeFieldsBtn);
+        if (rmFieldsEl) {
+            rmFieldsEl.addEventListener("click", createZapierButton);
+        }
         if (document.querySelector(zapierDropdownSelector) && document.querySelector(injectBtnLocation)) {
             website = null;
-            let apiName = document.querySelector(zapierDropdownSelector).textContent.trim();
-            apiName = apiName.split(" ").shift();
+            const apiName = document.querySelector(zapierDropdownSelector).textContent.trim();
             setWebsite(apiName, true);
             // We need to remove all existing buttons when a dropdown element is selected
             document.querySelectorAll(btnSels).forEach((el) => el.remove());
+            buildListeners();
             // No need to continue when the user select a custom script
             if (!website) {
+                clearInterval(detectButton);
                 return;
             }
             websiteName = WEBSITEENUM[website].name;
             websiteUrl = WEBSITEENUM[website].websiteUrl;
             openConnection();
-            buildListeners();
             clearInterval(detectButton);
         }
     }, FAST_POLL);
@@ -111,6 +146,7 @@ const createZapierButton = () => {
 const createButton = () => {
     const checkExist = setInterval(() => {
         const sel = "div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) label a";
+        const stepSel = "div[id*=\"formField-sessionCookie\"]";
         const cookiesFieldsSelectors = "div[data-alpaca-field-path*=\"/sessionCookie\"]";
         const select = document.querySelector("div[data-alpaca-field-path] select");
         const networksCount = document.querySelectorAll(cookiesFieldsSelectors).length;
@@ -119,27 +155,48 @@ const createButton = () => {
         if (document.querySelector(sel)) {
             const apiLink = document.querySelector(sel).getAttribute("href");
             setWebsite(apiLink);
+            // No need to continue when no website were found
+            if (!website) {
+                return clearInterval(checkExist);
+            }
             websiteName = WEBSITEENUM[website].name;
             websiteUrl = WEBSITEENUM[website].websiteUrl;
-            const btn = document.createElement("BUTTON");
-            btn.id = "pbExtensionButton";
-            const css = getPredefinedCSS();
-            if (isV2InputPage()) {
-                Object.assign(btn.style, { borderRadius: "20px", color: "#FFF", marginBottom: "2px" });
-            }
-            btn.classList.add(...css);
-            btn.onclick = openConnection;
-            if (!document.querySelector("#pbExtensionButton")) {
+            const btn = buildPhantombusterButton();
+            if (!document.querySelector(`#${EXT_ID}`)) {
                 document.querySelector("div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) label").appendChild(btn);
-                document.querySelector("#pbExtensionButton").parentElement.style.display = "block";
+                document.querySelector(`#${EXT_ID}`).parentElement.style.display = "block";
             }
             enableButton();
             clearInterval(checkExist);
         }
+        else if (document.querySelector(stepSel)) {
+            if (document.querySelector(`#${EXT_ID}`)) {
+                return clearInterval(checkExist);
+            }
+            const cookies = Array.from(document.querySelectorAll(stepSel));
+            const networks = Array.from(new Set(cookies.map((el) => el.getAttribute("data-field-info")))).filter(Boolean);
+            // Don't go any further if there are more than 1 network
+            // We won't determine which one to use
+            if (networks.length !== 1) {
+                return clearInterval(checkExist);
+            }
+            const network = networks[0].toLowerCase();
+            const btn = buildPhantombusterButton();
+            setWebsite(network, true);
+            if (!website) {
+                return clearInterval(checkExist);
+            }
+            websiteName = WEBSITEENUM[website].name;
+            websiteUrl = WEBSITEENUM[website].websiteUrl;
+            cookies[0].style.display = "block";
+            cookies[0].prepend(btn);
+            enableButton();
+            return clearInterval(checkExist);
+        }
     }, FAST_POLL);
 };
-const refreshBtn = (evt) => {
-    const extensionBtn = document.querySelector("#pbExtensionButton");
+const refreshBtn = () => {
+    const extensionBtn = document.querySelector(`#${EXT_ID}`);
     if (!extensionBtn) {
         return;
     }
@@ -186,7 +243,7 @@ const sendMessage = (message) => {
     }
 };
 const disableButton = (cookiesLength) => {
-    document.querySelectorAll("#pbExtensionButton").forEach((el) => {
+    document.querySelectorAll(`#${EXT_ID}`).forEach((el) => {
         el.classList.add("btn-success");
         el.classList.remove("btn-warning");
         el.setAttribute("disabled", "true");
@@ -195,7 +252,7 @@ const disableButton = (cookiesLength) => {
     listenInputChange();
 };
 const enableButton = () => {
-    document.querySelectorAll("#pbExtensionButton").forEach((el) => {
+    document.querySelectorAll(`#${EXT_ID}`).forEach((el) => {
         if (!isV2InputPage()) {
             el.classList.add("btn-primary");
         }
@@ -208,14 +265,17 @@ const enableButton = () => {
 // send the website to background to query its cookies
 const openConnection = () => sendMessage({ website, silence: !!isZapierPage() });
 const listenInputChange = () => {
-    document.querySelector("#pbExtensionButton").parentElement.parentElement.querySelector("input").addEventListener("input", inputChange);
+    const el = isPhantombusterStepSetupPage() ? document.querySelector(`#${EXT_ID} ~ input`) : document.querySelector(`#${EXT_ID}`).parentElement.parentElement.querySelector("input");
+    if (el) {
+        el.addEventListener("input", inputChange);
+    }
 };
 const inputChange = (event) => {
     enableButton();
-    event.target.removeEventListener("type", inputChange, true);
+    event.target.removeEventListener("type", inputChange, !isPhantombusterStepSetupPage());
 };
 const displayLogin = () => {
-    document.querySelectorAll(isZapierPage() ? zapierExtensionId : "#pbextensionbutton").forEach((el) => {
+    document.querySelectorAll(isZapierPage() ? zapierExtensionId : `#${EXT_ID}`).forEach((el) => {
         if (isZapierPage()) {
             Object.assign(el.style, { background: "#DC3545", borderColor: "#DC3545" });
         }
@@ -225,6 +285,27 @@ const displayLogin = () => {
         el.textContent = `please log in to ${websiteName} to get your cookie`;
     });
 };
+const displayLoginOnZapier = () => {
+    if (document.querySelector(zapierLoginPromptId)) {
+        return;
+    }
+    const DEF_CSS = { position: "relative", right: 0, width: "auto", height: "auto", background: "#35C2DB", color: "#FFF" };
+    const injectBtnLocation = "fieldset[class*=\"Fields\"] div[class*=\"Field\"]:first-of-type";
+    const el = document.createElement("button");
+    el.textContent = `Please log into ${websiteName} to get your cookie`;
+    Object.assign(el.style, DEF_CSS);
+    el.classList.add("toggle-switch");
+    el.id = "zapierPbExtensionLogin";
+    el.type = "button";
+    el.onclick = () => {
+        window.open(websiteUrl, "_blank");
+        sendMessage({ opening: websiteName });
+    };
+    const entrypoint = document.querySelector(injectBtnLocation);
+    if (entrypoint) {
+        entrypoint.appendChild(el);
+    }
+};
 const buildCopyButton = (id, cookieName, cookieValue) => {
     const FLOOR = 10;
     const DEF_TXT = `Copy ${cookieName} cookie`;
@@ -232,6 +313,7 @@ const buildCopyButton = (id, cookieName, cookieValue) => {
     const DEF_CSS = { position: "relative", right: 0, width: "auto", height: "auto", background: "#35C2DB", color: "#FFF" };
     const res = document.createElement("button");
     res.id = id;
+    res.type = "button";
     res.classList.add("toggle-switch");
     Object.assign(res.style, DEF_CSS);
     res.textContent = DEF_TXT;
@@ -256,9 +338,9 @@ const buildCopyButton = (id, cookieName, cookieValue) => {
             // @ts-ignore
             navigator.clipboard.writeText(tmp.value);
         }
-        sendMessage({ notif: { title: "Phantombuster", message: `Your ${cookieName} is copied into the clipboard` } });
+        sendMessage({ notif: { title: "Phantombuster", message: `Your ${cookieName} is copied in the clipboard` } });
         Object.assign(res.style, DEF_CSS, { background: "#5CB85C" });
-        res.textContent = `${cookieName} copied into clipboard!`;
+        res.textContent = `${cookieName} copied in the clipboard!`;
         setTimeout(() => {
             Object.assign(res.style, DEF_CSS);
             res.textContent = DEF_TXT;
@@ -270,53 +352,80 @@ const buildCopyButton = (id, cookieName, cookieValue) => {
 };
 // fill the form with the correct cookie(s)
 const setCookies = (cookies) => {
-    const isZapier = document.location.hostname.indexOf("zapier.com") > -1;
-    if (isZapier) {
-        const injectBtnLocation = "fieldset.fm-fields.child-fields-group";
+    if (isZapierPage()) {
+        const injectBtnLocation = "fieldset[class*=\"Fields\"]";
         const btnId = "zapierPbExtension";
         let i = 0;
         for (const cookie of cookies) {
+            const loginPrompt = document.querySelector(zapierLoginPromptId);
+            if (loginPrompt) {
+                loginPrompt.parentElement.removeChild(loginPrompt);
+            }
             const labels = Array.from(document.querySelectorAll(`${injectBtnLocation} label`))
                 .filter((el) => el.textContent.trim().toLowerCase().indexOf(cookie.name) > -1);
             const btn = buildCopyButton(`${btnId}${i}`, cookie.name, cookie.value);
             if (labels.length < 1) {
-                document.querySelector(`${injectBtnLocation} .fm-field:first-of-type .fm-label`).appendChild(btn);
+                document.querySelector(`${injectBtnLocation} div[class*=\"Field\"]:first-of-type label`).appendChild(btn);
             }
             else {
-                const injectLocation = parentUntils(labels.shift(), "fm-label");
+                const injectLocation = parentUntils(labels.shift(), "FieldsForm", true);
+                const alreadyInDOM = document.querySelector(`#${btn.id}`);
+                if (alreadyInDOM) {
+                    alreadyInDOM.parentElement.removeChild(alreadyInDOM);
+                }
                 injectLocation.appendChild(btn);
             }
             i++;
         }
     }
     else {
+        const sel = isPhantombusterStepSetupPage() ? `div[data-field-info=${websiteName.toLowerCase()}] input` : "div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) input";
         for (let i = 0; i < cookies.length; i++) {
-            const inputField = document.querySelectorAll("div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) input")[i];
+            const inputField = document.querySelectorAll(sel)[i];
             inputField.value = cookies[i].value;
+            // We need to send an event to the react element handler to prevent an auto reset
+            if (isPhantombusterStepSetupPage()) {
+                inputField.dispatchEvent(new Event("input", { bubbles: true }));
+            }
         }
         disableButton(cookies.length);
     }
 };
 // listen to messages from background
-_browserMain.runtime.onMessage.addListener((message, sender, sendResponse) => {
+_browserMain.runtime.onMessage.addListener((message) => {
     if (message.cookies) {
         const cookies = message.cookies;
         if (cookies[0]) {
             setCookies(cookies);
         }
         else {
+            if (isZapierPage()) {
+                return displayLoginOnZapier();
+            }
             displayLogin();
             window.open(websiteUrl, "_blank");
             sendMessage({ opening: websiteName });
         }
     }
     if (message.restart) {
+        if (isPhantombusterUserLoggedAs()) {
+            return;
+        }
         if (isV2InputPage()) {
+            setExtensionLoadProof();
             createButton();
+        }
+        else {
+            createZapierButton();
         }
     }
 });
 const main = () => {
+    setExtensionLoadProof();
+    // no need to continue if the current user is in logged as state
+    if (isPhantombusterUserLoggedAs()) {
+        return;
+    }
     // add an event listener next to all launch buttons
     document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createButton));
     document.querySelectorAll(".launchButtonOptions, #launchButtonModalSwitchEditor").forEach((el) => el.addEventListener("click", createSheetButton));
