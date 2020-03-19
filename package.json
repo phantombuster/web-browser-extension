@@ -1,12 +1,10 @@
 {
 	"name": "webextensions-typescript",
-	"version": "1.0.10",
+	"version": "1.0.11",
 	"description": "Phantombuster Cookie",
 	"main": "index.js",
 	"scripts": {
-		"eslint": "eslint --max-warnings 60 'libs/**/*.js' 'store/**/*.js'",
-		"eslint:error": "eslint --max-warnings 40 'libs/**/*.js' 'store/**/*.js' --quiet",
-		"tslint": "tslint 'libs/**/*.ts' 'store/**/*.ts'",
+		"tslint": "tslint src/*.ts",
 		"build": "npm run tslint && tsc --diagnostics",
 		"build:watch": "tsc --watch",
 		"zip": "zip -r phantombuster-web-extension.zip ./js/data.js ./js/background.js ./manifest.json ./img ./js/main.js",
