@@ -7,6 +7,7 @@ const WEBSITEENUM = {
 	Quora: { match: "/quora", name: "Quora", websiteUrl: "https://quora.com", cookiesList: [ { name: "m-b", domain: ".quora.com" } ] },
 	LinkedIn: {match: "/linkedin", name: "LinkedIn", websiteUrl: "https://www.linkedin.com/", cookiesList: [{ name: "li_at", domain: ".www.linkedin.com" }]},
 	Medium: {match: "/medium", name: "Medium", websiteUrl: "https://www.medium.com", cookiesList: [{ name: "uid", domain: ".medium.com" }, { name: "sid", domain: ".medium.com" }]},
+	Pinterest: { match: "/pinterest", name: "Pinterest", websiteUrl: "https://pinterest.com", cookiesList: [{ name: "_pinterest_sess", domain: ".pinterest.com" }] },
 	ProductHunt: {match: "/product-hunt", name: "Product Hunt", websiteUrl: "https://www.producthunt.com", cookiesList: [{ name: "_producthunt_session_production", domain: ".producthunt.com" }]},
 	Slack: {match: "/slack", name: "Slack", websiteUrl: "https://www.slack.com", cookiesList: [{ name: "d", domain: ".slack.com" }]},
 	Twitter: {match: "/twitter", name: "Twitter", websiteUrl: "https://twitter.com/", cookiesList: [{ name: "auth_token", domain: ".twitter.com" }]},
