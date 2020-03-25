@@ -380,31 +380,47 @@ const buildCopyButton = (id: string, cookieName: string, cookieValue: string): H
 	return res
 }
 
+const injectScript = (func: (val1: string, val2: string) => void, val1: string, val2: string) => {
+	const script = document.createElement("script")
+	script.textContent = `(${func})(${JSON.stringify(val1)}, ${JSON.stringify(val2)});`;
+	(document.head || document.documentElement).appendChild(script)
+	script.remove()
+}
+
 // fill the form with the correct cookie(s)
 const setCookies = (cookies) => {
 	if (isZapierPage()) {
-		const injectBtnLocation = "fieldset[class*=\"Fields\"]"
-		const btnId = "zapierPbExtension"
-		let i = 0
 		for (const cookie of cookies) {
 			const loginPrompt = document.querySelector(zapierLoginPromptId)
 			if (loginPrompt) {
 				loginPrompt.parentElement.removeChild(loginPrompt)
 			}
-			const labels = Array.from(document.querySelectorAll<HTMLElement>(`${injectBtnLocation} label`))
-				.filter((el) => el.textContent.trim().toLowerCase().indexOf(cookie.name) > -1)
-			const btn = buildCopyButton(`${btnId}${i}`, cookie.name, cookie.value)
-			if (labels.length < 1) {
-				document.querySelector(`${injectBtnLocation} div[class*=\"Field\"]:first-of-type label`).appendChild(btn)
-			} else {
-				const injectLocation = parentUntils(labels.shift(), "FieldsForm", true)
-				const alreadyInDOM = document.querySelector(`#${btn.id}`)
-				if (alreadyInDOM) {
-					alreadyInDOM.parentElement.removeChild(alreadyInDOM)
+
+			injectScript((cookieName, cookieValue) => {
+				const parentUntil = (el: HTMLElement, selector: string, regex?: boolean): HTMLElement|null => {
+					if (regex) {
+						if (el.className.indexOf(selector) > -1) {
+							return el
+						}
+					} else {
+						if (el.classList.contains(selector)) {
+							return el
+						}
+					}
+					if (el.tagName.toLowerCase() === "body") {
+						return null
+					}
+					return parentUntil(el.parentElement, selector, regex)
 				}
-				injectLocation.appendChild(btn)
-			}
-			i++
+
+				const labels = Array.from(document.querySelectorAll<HTMLElement>("fieldset[class*=\"Fields\"] label"))
+					.filter((el) => el.textContent.trim().toLowerCase().indexOf(cookieName) > -1)
+				const injectLocation = parentUntil(labels.shift(), "FieldsForm", true)
+				// @ts-ignore
+				injectLocation.querySelector("div[class*=\"Input\"] div").focus()
+				// @ts-ignore
+				injectLocation.querySelector(".CodeMirror").CodeMirror.setValue(cookieValue)
+			}, cookie.name, cookie.value)
 		}
 	} else {
 		const sel = isPhantombusterStepSetupPage() ? `div[data-field-info=${websiteName.toLowerCase()}] input` : "div[data-alpaca-field-path*=\"/sessionCookie\"]:not([style*=\"display: none\"]) input"
