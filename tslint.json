@@ -20,7 +20,9 @@
 		"ignoreDefinitionFiles": false,
 		"no-floating-promises": [true, "Bluebird"],
 		"await-promise": [true, "Bluebird"],
-		"no-duplicate-imports": true
+		"no-duplicate-imports": true,
+		"cyclomatic-complexity": [true, 5],
+		"no-magic-numbers": true
 	},
 	"rulesDirectory": []
 }
