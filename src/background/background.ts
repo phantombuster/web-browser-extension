@@ -2,16 +2,16 @@ import { WEBSITEENUM } from "../shared/websites"
 
 declare var browser: typeof chrome
 const _browser = chrome || browser
-let domain
-let cookiesList
-let tabID
+let domain: string
+let cookiesList: chrome.cookies.Cookie[]
+let tabID: number
 let cookiesSent = false
 
 const sendNotification = (title: string, message: string) => {
 	_browser.notifications.create({ type: "basic", message, title, iconUrl: "./img/icon.png", silent: true } as NotificationOptions)
 }
 
-const sendCookie = (cookies, silence = false) => {
+const sendCookie = (cookies: chrome.cookies.Cookie[], silence = false) => {
 	_browser.tabs.sendMessage(tabID, {cookies})
 	if (cookies[0]) {
 		cookiesSent = true
@@ -35,16 +35,19 @@ const cookieChanged = () => {
 	})
 }
 
+// TODO: remove thos ugly ts-ignore
 _browser.runtime.onMessage.addListener((msg, sender, _sendResponse) => {
 	if (msg.opening) {
 		_browser.cookies.onChanged.addListener(cookieChanged)
 	}
 	if (msg.website) {
 		cookiesSent = false
-		const website = msg.website
+		const website = msg.website as string
 		const canSendNotif = msg.silence
-		tabID = sender.tab.id
+		tabID = sender?.tab?.id as number
+		// @ts-ignore
 		domain = WEBSITEENUM[website].domain
+		// @ts-ignore
 		cookiesList = WEBSITEENUM[website].cookiesList
 		_browser.cookies.getAll({}, (cookies) => {
 			console.log("cookies:", cookies)
@@ -65,9 +68,9 @@ _browser.runtime.onInstalled.addListener(() => {
 	_browser.tabs.query({ url: [ "*://*.phantombuster.com/*", "*://zapier.com/*" ] }, (tabs) => {
 		for (const t of tabs) {
 			if (isChrome) {
-				_browser.tabs.reload(t.id)
+				_browser.tabs.reload(t.id as number)
 			} else {
-				_browser.tabs.sendMessage(t.id, { restart: "restart" })
+				_browser.tabs.sendMessage(t.id as number, { restart: "restart" })
 			}
 		}
 	})
@@ -81,7 +84,7 @@ _browser.tabs.onUpdated.addListener((id, changeInfo, tab) => {
 	if (!tab.url || (tab.url.indexOf("phantombuster.com") < 0 && tab.url.indexOf("zapier.com") < 0)) {
 		return
 	}
-	if (changeInfo.status && changeInfo.status === "complete") {
+	if (changeInfo?.status === "complete") {
 		_browser.tabs.sendMessage(id, { restart: "restart" })
 	}
 })
