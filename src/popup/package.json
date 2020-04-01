@@ -25,18 +25,25 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
+    "@types/chrome": "0.0.103",
     "@types/jest": "^24.9.1",
     "@types/node": "^12.12.34",
     "@types/react": "^16.9.29",
     "@types/react-dom": "^16.9.5",
+    "@types/react-router": "^5.1.5",
+    "@types/react-router-dom": "^5.1.3",
     "cra-build-watch": "^3.2.0",
     "html-webpack-plugin": "^4.0.0-beta.14",
+    "pb2-css": "github:phantombuster/pb2-css",
     "react-scripts": "3.4.1",
     "typescript": "^3.7.5",
+    "web-ext-types": "^3.2.1",
     "webpack": "~4.42.0"
   },
   "dependencies": {
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "react-router": "^5.1.2",
+    "react-router-dom": "^5.1.2"
   }
 }
