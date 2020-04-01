@@ -1,3 +1,6 @@
+import "./contentscript.sass"
+import { WEBSITEENUM } from "../shared/websites"
+
 declare var browser: typeof chrome
 const _browserMain = chrome || browser
 

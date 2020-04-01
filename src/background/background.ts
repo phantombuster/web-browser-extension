@@ -1,4 +1,5 @@
-// background-script.js
+import { WEBSITEENUM } from "../shared/websites"
+
 declare var browser: typeof chrome
 const _browser = chrome || browser
 let domain
@@ -15,7 +16,7 @@ const sendCookie = (cookies, silence = false) => {
 	if (cookies[0]) {
 		cookiesSent = true
 		if (!silence) {
-			const message = `Your ${website} ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
+			const message = `Your ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
 			// @ts-ignore
 			_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon.png", silent: true})
 		}
@@ -40,7 +41,7 @@ _browser.runtime.onMessage.addListener((msg, sender, _sendResponse) => {
 	}
 	if (msg.website) {
 		cookiesSent = false
-		website = msg.website
+		const website = msg.website
 		const canSendNotif = msg.silence
 		tabID = sender.tab.id
 		domain = WEBSITEENUM[website].domain
@@ -84,3 +85,4 @@ _browser.tabs.onUpdated.addListener((id, changeInfo, tab) => {
 		_browser.tabs.sendMessage(id, { restart: "restart" })
 	}
 })
+

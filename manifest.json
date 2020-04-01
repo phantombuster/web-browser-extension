@@ -1,32 +1,29 @@
 {
 	"manifest_version": 2,
 	"name": "Phantombuster",
-	"version": "1.0.11",
+	"version": "1.1.0",
 	"description": "Makes Phantombuster easier to use by automatically retrieving your session cookies",
 	"icons": {
-		"48":"img/icon.png",
-		"128": "img/icon.png"
+		"48":"assets/buster-icon.png",
+		"128": "assets/buster-icon.png"
 	},
 	"homepage_url": "http://www.phantombuster.com/",
 	"background": {
-		"scripts": [
-			"/js/background.js",
-			"/js/data.js"
-		]
+		"scripts": ["background.js"]
 	},
 	"browser_action": {
 		"default_icon": {
-			"128": "img/icon.png"
-		}
+			"128": "assets/buster-icon.png"
+		},
+		"default_popup": "popup/index.html",
+		"default_title": "Phantombuster"
 	},
 	"content_scripts": [
 		{
 			"matches": [ "*://*.phantombuster.com/*", "*://zapier.com/*" ],
 			"run_at": "document_end",
-			"js": [
-				"/js/main.js",
-				"/js/data.js"
-			]
+			"js": ["contentscript.js"],
+			"css": ["contentscript.css"]
 		}
 	],
 	"permissions": [
@@ -47,5 +44,7 @@
 		"*://*.youtube.com/*",
 		"*://*.quora.com/*",
 		"*://*.pinterest.com/*"
-	]
+	],
+	"web_accessible_resources": ["assets/*"],
+	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }
