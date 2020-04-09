@@ -30,9 +30,11 @@
 		"notifications",
 		"tabs",
 		"cookies",
+		"webRequest",
+		"webRequestBlocking",
 		"*://*.phantombuster.com/*",
 		"*://*.facebook.com/*",
-		"*://github.com/*",
+		"*://*.github.com/*",
 		"*://*.instagram.com/*",
 		"*://*.intercom.io/*",
 		"*://*.linkedin.com/*",
@@ -45,6 +47,6 @@
 		"*://*.quora.com/*",
 		"*://*.pinterest.com/*"
 	],
-	"web_accessible_resources": ["assets/*"],
+	"web_accessible_resources": ["assets/*", "switchCookies.js"],
 	"content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }

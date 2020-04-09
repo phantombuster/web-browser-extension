@@ -15,6 +15,7 @@ module.exports = {
   entry: {
     contentscript: join(__dirname, 'src/contentscript/contentscript.ts'),
     background: join(__dirname, 'src/background/background.ts'),
+    switchCookies: join(__dirname, 'src/inject/switchCookies.ts'),
   },
   output: {
     path: join(__dirname, 'dist'),

@@ -1,91 +1,163 @@
-import { WEBSITEENUM } from "../shared/websites"
+import { bWebsites as websites } from "../shared/websites"
+import { processCookieStr, processSetCookieStr } from "../shared/cookies"
+import { browser, Tabs, Cookies, WebRequest } from "webextension-polyfill-ts"
 
-declare var browser: typeof chrome
-const _browser = chrome || browser
 let domain: string
-let cookiesList: chrome.cookies.Cookie[]
+let cookiesList: Cookies.Cookie[] = []
 let tabID: number
 let cookiesSent = false
+let website: string
+let pbTab: Tabs.Tab
+let tab: Tabs.Tab
+
+let prefix: string = ""
 
 const sendNotification = (title: string, message: string) => {
-	_browser.notifications.create({ type: "basic", message, title, iconUrl: "./img/icon.png", silent: true } as NotificationOptions)
+	browser.notifications.create({ type: "basic", message, title, iconUrl: "assets/buster-icon.png", }).catch((error: Error) => {
+		console.error(error)
+	})
 }
 
-const sendCookie = (cookies: chrome.cookies.Cookie[], silence = false) => {
-	_browser.tabs.sendMessage(tabID, {cookies})
+const sendCookies = async (cookies: Cookies.Cookie[]) => {
+	await browser.tabs.sendMessage(tabID, { websiteName: website, cookies })
 	if (cookies[0]) {
 		cookiesSent = true
-		if (!silence) {
-			const message = `Your ${cookies.length > 1 ? "cookies have" : "cookie has"} been successfully entered.`
-			// @ts-ignore
-			_browser.notifications.create({type: "basic", message, title: "Phantombuster", iconUrl: "./img/icon.png", silent: true})
-		}
 	}
 }
 
-const cookieChanged = () => {
-	_browser.cookies.getAll({ domain }, (cookies) => {
-		console.log("domain:", domain)
-		const retrievedCookies = cookiesList.map((cookie) => cookies.filter((el) => el.name === cookie.name && el.domain === cookie.domain)[0])
-		console.log("retrievedCookies:", retrievedCookies)
-		if (retrievedCookies[0] && !cookiesSent) {
-			_browser.cookies.onChanged.removeListener(cookieChanged)
-			sendCookie(retrievedCookies)
+const cookieChanged = async () => {
+	const cookies = await browser.cookies.getAll({ domain })
+
+	console.log("domain:", domain)
+	const retrievedCookies = cookiesList.map((cookie) => {
+		const c = cookies.filter((el) => el.name === `${prefix}${cookie.name}` && el.domain === cookie.domain)[0]
+		if (c && prefix.length > 0) {
+			c.name = c.name.substring(prefix.length, c.name.length)
 		}
+		return c
 	})
+	console.log("retrievedCookies:", retrievedCookies)
+	if (retrievedCookies[0] && !cookiesSent) {
+		browser.cookies.onChanged.removeListener(cookieChanged)
+		if (tab.id) {
+			await browser.tabs.remove(tab.id)
+		}
+		if (pbTab) {
+			console.log(pbTab)
+			await browser.tabs.highlight({"tabs": pbTab.index})
+		}
+		await sendCookies(retrievedCookies)
+	}
 }
 
-// TODO: remove thos ugly ts-ignore
-_browser.runtime.onMessage.addListener((msg, sender, _sendResponse) => {
+browser.runtime.onMessage.addListener(async (msg, sender) => {
 	if (msg.opening) {
-		_browser.cookies.onChanged.addListener(cookieChanged)
+		console.log("opening")
+		const tabs = await browser.tabs.query({ currentWindow: true, active: true })
+		if (tabs.length > 0) {
+			pbTab = tabs[0]
+		}
+		tab = await browser.tabs.create({})
+		console.log(tab)
+
+		if (tab.id) {
+
+			const reserved = 10000000
+			prefix = `pb_${Math.round((Math.random() * (Number.MAX_SAFE_INTEGER - reserved)) + reserved).toString()}_`
+
+			browser.webRequest.onBeforeSendHeaders.addListener(
+				(details) => {
+					details.requestHeaders?.forEach((requestHeader) => {
+						if (requestHeader.name.toLowerCase() === "cookie" && requestHeader.value) {
+							// console.log(JSON.stringify(requestHeader.value.split("; "), null, "\t"))
+							requestHeader.value = processCookieStr(requestHeader.value, prefix)
+							// console.log(JSON.stringify(requestHeader.value.split("; "), null, "\t"))
+							// console.log("----------")
+						}
+					})
+					return {
+						requestHeaders: details.requestHeaders
+					}
+				}, {
+					urls: ["*://*/*"],
+					tabId: tab.id,
+				}, [
+					"blocking",
+					"requestHeaders",
+					"extraHeaders" as WebRequest.OnBeforeSendHeadersOptions
+				]
+			)
+
+			browser.webRequest.onHeadersReceived.addListener(
+				(details) => {
+					details.responseHeaders?.forEach((responseHeader) => {
+						if (responseHeader.name.toLowerCase() === "set-cookie" && responseHeader.value) {
+							// console.log(JSON.stringify(responseHeader.value.split("; "), null, "\t"))
+							responseHeader.value = processSetCookieStr(responseHeader.value, prefix)
+							// console.log(JSON.stringify(responseHeader.value.split("; "), null, "\t"))
+							// console.log("----------")
+						}
+					})
+					return {
+						responseHeaders: details.responseHeaders
+					}
+				}, {
+					urls: ["*://*/*"],
+					tabId: tab.id,
+				}, [
+					"blocking",
+					"responseHeaders",
+					"extraHeaders" as WebRequest.OnHeadersReceivedOptions
+				]
+			)
+
+			await browser.tabs.update(tab.id, {url: msg.opening})
+
+			await browser.tabs.sendMessage(tab.id, { injectCookies: { prefix } })
+		}
+
+		browser.cookies.onChanged.addListener(cookieChanged)
 	}
-	if (msg.website) {
+	if (msg.getCookies) {
 		cookiesSent = false
-		const website = msg.website as string
-		const canSendNotif = msg.silence
+		website = msg.websiteName as string
 		tabID = sender?.tab?.id as number
 		// @ts-ignore
-		domain = WEBSITEENUM[website].domain
+		domain = websites[website].domain
+		console.log(website, domain)
 		// @ts-ignore
-		cookiesList = WEBSITEENUM[website].cookiesList
-		_browser.cookies.getAll({}, (cookies) => {
-			console.log("cookies:", cookies)
-			const retrievedCookies = cookiesList.map((cookie) => cookies.filter((el) => el.name === cookie.name && el.domain === cookie.domain)[0])
-			console.log("retrievedCookies", retrievedCookies)
-			sendCookie(retrievedCookies, canSendNotif)
-		})
+		cookiesList = websites[website].cookiesList
+		const cookies = await browser.cookies.getAll({})
+		console.log("cookies:", cookies)
+		const retrievedCookies = cookiesList.map((cookie) => cookies.filter((el) => el.name === cookie.name && el.domain === cookie.domain)[0])
+		console.log("retrievedCookies", retrievedCookies)
+		if (msg.newSession) {
+			await sendCookies([])
+		} else {
+			await sendCookies(retrievedCookies)
+		}
 	} else if (msg.notif) {
-		const { title, message } = msg.notif
-		sendNotification(title, message)
+		sendNotification(msg.notif.title || "Phantombuster", msg.notif.message)
 	}
 })
 
-// The extension will relaunch whenever it was first install or an update
-_browser.runtime.onInstalled.addListener(() => {
+browser.runtime.onInstalled.addListener(async () => {
 	const isChrome = document.location.protocol.indexOf("chrome") > -1
-	// only send signals to phantombuster & zapier pages
-	_browser.tabs.query({ url: [ "*://*.phantombuster.com/*", "*://zapier.com/*" ] }, (tabs) => {
-		for (const t of tabs) {
-			if (isChrome) {
-				_browser.tabs.reload(t.id as number)
-			} else {
-				_browser.tabs.sendMessage(t.id as number, { restart: "restart" })
-			}
+	const tabs = await browser.tabs.query({ url: [ "*://*.phantombuster.com/*", "*://zapier.com/*" ] })
+	for (const t of tabs) {
+		if (isChrome) {
+			await browser.tabs.reload(t.id as number)
+		} else {
+			await browser.tabs.sendMessage(t.id as number, { restart: "restart" })
 		}
-	})
+	}
 })
 
-// redirecting to phantombuster.com when clicking on main icon
-_browser.browserAction.onClicked.addListener((_tab) => _browser.tabs.update({ url: "https://phantombuster.com" }))
-
-_browser.tabs.onUpdated.addListener((id, changeInfo, tab) => {
-	// Only monitor Phantombuster & Zapier tabs
-	if (!tab.url || (tab.url.indexOf("phantombuster.com") < 0 && tab.url.indexOf("zapier.com") < 0)) {
+browser.tabs.onUpdated.addListener(async (id, changeInfo, tabb) => {
+	if (!tabb.url || (tabb.url.indexOf("phantombuster.com") < 0 && tabb.url.indexOf("zapier.com") < 0)) {
 		return
 	}
 	if (changeInfo?.status === "complete") {
-		_browser.tabs.sendMessage(id, { restart: "restart" })
+		await browser.tabs.sendMessage(id, { restart: "restart" })
 	}
 })
-
