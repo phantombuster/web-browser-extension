@@ -46,8 +46,7 @@ const sendNotification = (title: string, message: string) => {
 	})
 }
 
-// At start, content scripts do nothing except waiting for a "restart" message to start their job.
-// Here we attach an a listener to each tab to (re)start the extension if the domain matches
+// Here we attach an a listener to each tab url change to (re)start the extension if the domain matches
 // the list of domains where we want the extension to run content scripts.
 browser.tabs.onUpdated.addListener(async (id, changeInfo, tab) => {
 	if (tab.url && extensionWebsiteDomains.some(v => tab.url!.includes(v)) && changeInfo.status === "complete") {

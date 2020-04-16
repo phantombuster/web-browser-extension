@@ -32,8 +32,9 @@ const main = () => {
 	}
 	runtimeMessagesListener(detectedHandlers)
 	for (const handler of detectedHandlers) {
+		handler.destroy()
 		handler.run().catch((e) => console.error(e))
 	}
 }
 
-runtimeMessagesListener([])
+main()
