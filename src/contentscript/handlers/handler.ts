@@ -5,7 +5,9 @@ export type HandlerClass = new () => Handler
 
 export abstract class Handler {
 	protected sendMessage = async (msg: FromContentScriptRuntimeMessages) => {
+		console.log("Message sent", msg)
 		try {
+			// tslint:disable-next-line:ban
 			await browser.runtime.sendMessage(msg)
 		} catch (err) {
 			try {

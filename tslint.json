@@ -22,7 +22,12 @@
 		"await-promise": [true, "Bluebird"],
 		"no-duplicate-imports": true,
 		"cyclomatic-complexity": [true, 10],
-		"no-magic-numbers": true
+		"no-magic-numbers": true,
+		"ban": [true,
+			{ "name": ["browser", "tabs", "sendMessage"], "message": "Use sendMessage() instead."},
+			{ "name": ["browser", "runtime", "sendMessage"], "message": "Use this.sendMessage() instead."},
+			{ "name": ["browser", "notifications", "create"], "message": "Use sendNotification() instead"}
+		]
 	},
 	"rulesDirectory": []
 }

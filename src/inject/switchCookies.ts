@@ -7,12 +7,11 @@ declare global {
 	}
 }
 
-const documentCookie = Object.getOwnPropertyDescriptor(document, "cookie")
+const documentCookie = Object.getOwnPropertyDescriptor(Document.prototype, "cookie") || Object.getOwnPropertyDescriptor(HTMLDocument.prototype, "cookie")
 const cookieGetter = documentCookie?.get
 const cookieSetter = documentCookie?.set
 
 if (cookieGetter && cookieSetter && window.injectedSwitchCookiePrefix) {
-	console.log("pouet")
 	Object.defineProperty(document, "cookie", {
 		get: () => processCookieStr(cookieGetter(), window.injectedSwitchCookiePrefix),
 		set: (cookieString) => cookieSetter(processSetCookieStr(cookieString, window.injectedSwitchCookiePrefix)),

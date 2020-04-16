@@ -1,6 +1,6 @@
 export const processCookieStr = (cookiesStr: string, prefix: string) => {
 	const cookieStrList = cookiesStr.split("; ")
-	const newStrList: string[] = []
+	const newStrList = []
 
 	for (const cookieStr of cookieStrList) {
 		if (cookieStr.startsWith(prefix)) {
@@ -11,5 +11,11 @@ export const processCookieStr = (cookiesStr: string, prefix: string) => {
 }
 
 export const processSetCookieStr = (str: string, prefix: string) => {
-	return prefix + str
+	const cookieStrList = str.split("\n")
+	const newStrList = []
+
+	for (const setCookie of cookieStrList) {
+		newStrList.push(`${prefix}${setCookie}`)
+	}
+	return newStrList.join("\n")
 }

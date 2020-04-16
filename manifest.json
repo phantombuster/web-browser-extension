@@ -20,7 +20,23 @@
 	},
 	"content_scripts": [
 		{
-			"matches": [ "*://*.phantombuster.com/*", "*://zapier.com/*" ],
+			"matches": [
+				"*://*.phantombuster.com/*",
+				"*://*.zapier.com/*",
+				"*://*.facebook.com/*",
+				"*://*.github.com/*",
+				"*://*.instagram.com/*",
+				"*://*.intercom.io/*",
+				"*://*.linkedin.com/*",
+				"*://*.medium.com/*",
+				"*://*.producthunt.com/*",
+				"*://*.slack.com/*",
+				"*://*.twitter.com/*",
+				"*://*.uber.com/*",
+				"*://*.youtube.com/*",
+				"*://*.quora.com/*",
+				"*://*.pinterest.com/*"
+			],
 			"run_at": "document_end",
 			"js": ["contentscript.js"],
 			"css": ["contentscript.css"]
@@ -29,6 +45,7 @@
 	"permissions": [
 		"notifications",
 		"tabs",
+		"activeTab",
 		"cookies",
 		"webRequest",
 		"webRequestBlocking",

@@ -1,6 +1,7 @@
 import { FromBackgroundRuntimeMessages } from "../../shared/messages"
-import { websites, IWebsite, WebsiteName } from "../../shared/websites"
+import { IWebsite, WebsiteName, getWebsiteFromUrl } from "../../shared/websites"
 import { Handler } from "./handler"
+import { Cookies } from "webextension-polyfill-ts"
 
 const getSpinner = () => {
 	const svgSpinner = document.createElement("div")
@@ -52,8 +53,8 @@ export class PhantombusterOldSetup extends Handler {
 	}
 
 	public onMessage = (msg: FromBackgroundRuntimeMessages) => {
-		if (msg.websiteName && msg.cookies) {
-			this._onMessageCookies(msg.websiteName, msg.cookies)
+		if (msg.cookies) {
+			this._onMessageCookies(msg.cookies.websiteName, msg.cookies.cookies, msg.cookies.newSession)
 		}
 	}
 
@@ -65,29 +66,34 @@ export class PhantombusterOldSetup extends Handler {
 		if (this._interval) {
 			clearInterval(this._interval)
 		}
+		console.log("destroyyyyyyyyyyyyyyyyyy")
 	}
 
-	private _onMessageCookies = (websiteName: WebsiteName, cookies: { name: string, value: string }[]) => {
+	private _onMessageCookies = (websiteName: WebsiteName, cookies: Cookies.Cookie[], newSession = false) => {
 		const foundWebsite = this._foundWebsites[websiteName]
 		if (foundWebsite) {
 			if (cookies.length === 0 || !cookies[0]) {
-				console.log(cookies)
-				this._websiteLogin(foundWebsite)
+				this._websiteLogin(foundWebsite, newSession)
 			} else {
-				console.log(cookies)
 				void this._fillInputs(foundWebsite, cookies)
 			}
 		}
 	}
 
-	private _websiteLogin = (foundWebsite: IFoundWebsite) => {
+	private _websiteLogin = (foundWebsite: IFoundWebsite, newSession = false) => {
 		foundWebsite.login = true
 		for (const element of foundWebsite.elements) {
 			element.btn.textContent = "Getting Cookie"
 			element.btn.appendChild(getSpinner())
 		}
 		void this.sendMessage({ notif: { message: `Please log in to ${foundWebsite.website.name} to get your cookie` } })
-		void this.sendMessage({ opening: foundWebsite.website.url })
+		void this.sendMessage({
+			newTab: {
+				websiteName: foundWebsite.website.name,
+				url: foundWebsite.website.url,
+				newSession,
+			}
+		})
 	}
 
 	private _enableButton = (btn: HTMLButtonElement) => {
@@ -102,7 +108,7 @@ export class PhantombusterOldSetup extends Handler {
 		}
 	}
 
-	private _fillInputs = async (foundWebsite: IFoundWebsite, cookies: { name: string, value: string }[]) => {
+	private _fillInputs = async (foundWebsite: IFoundWebsite, cookies: Cookies.Cookie[]) => {
 		if (foundWebsite.login) {
 			await new Promise((resolve) => setTimeout(resolve, this._spinnerDelay))
 		}
@@ -115,14 +121,7 @@ export class PhantombusterOldSetup extends Handler {
 				foundWebsite.elements[i].input.addEventListener("input", () => { this._onInputChange(foundWebsite.elements) })
 			}
 		}
-	}
-
-	private _findWebsiteFromUrl = (url: string) => {
-		const matchingWebsites = websites.filter((website) => url.toLowerCase().indexOf(website.match.toLowerCase()) > -1)
-		if (matchingWebsites.length === 1) {
-			return matchingWebsites[0]
-		}
-		return null
+		void this.sendMessage({ notif: { message: `Your ${foundWebsite.website.name} cookie${(cookies.length > 1) ? "s have" : " has"} been pasted` } })
 	}
 
 	private _createGetCookieBtn(website: IWebsite) {
@@ -147,11 +146,12 @@ export class PhantombusterOldSetup extends Handler {
 			el.disabled = true
 		} else {
 			el.onclick = (event: MouseEvent) => {
-				if (event.shiftKey) {
-					void this.sendMessage({ getCookies: true, websiteName: website.name, newSession: true })
-				} else {
-					void this.sendMessage({ getCookies: true, websiteName: website.name })
-				}
+				void this.sendMessage({
+					getCookies: {
+						websiteName: website.name,
+						newSession: event.shiftKey,
+					}
+				})
 			}
 		}
 
@@ -167,7 +167,7 @@ export class PhantombusterOldSetup extends Handler {
 			if (!elemHref) {
 				return
 			}
-			const foundWebsite = this._findWebsiteFromUrl(elemHref)
+			const foundWebsite = getWebsiteFromUrl(elemHref)
 			if (!foundWebsite) {
 				return
 			}

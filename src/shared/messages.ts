@@ -1,23 +1,32 @@
 import { WebsiteName } from "./websites"
+import { Cookies } from "webextension-polyfill-ts"
 
 type FromBackgroundRuntimeMessages = {
 	restart?: boolean
-	websiteName?: WebsiteName
+
 	cookies?: {
-		name: string
-		value: string
-	}[]
+		websiteName: WebsiteName
+		cookies: Cookies.Cookie[]
+		newSession?: boolean
+	}
+
 	injectCookies?: {
 		prefix: string
 	}
 }
 
 type FromContentScriptRuntimeMessages = {
-	getCookies?: boolean
-	websiteName?: WebsiteName
-	newSession?: true
+	getCookies?: {
+		websiteName: WebsiteName
+		newSession: boolean
+	}
 
-	opening?: string
+	newTab?: {
+		websiteName: WebsiteName
+		url: string
+		newSession: boolean
+	}
+
 	notif? : {
 		title?: string
 		message: string
