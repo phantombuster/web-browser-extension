@@ -37,8 +37,7 @@
     "pb2-css": "github:phantombuster/pb2-css",
     "react-scripts": "3.4.1",
     "typescript": "^3.7.5",
-    "web-ext-types": "^3.2.1",
-    "webpack": "~4.42.0"
+    "web-ext-types": "^3.2.1"
   },
   "dependencies": {
     "react": "^16.13.1",

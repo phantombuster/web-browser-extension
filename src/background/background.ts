@@ -33,7 +33,7 @@ if (isChrome()) {
 
 // Function to be used to send message instead of browser.tabs.sendMessage()
 const sendMessage = async (tabId: number, msg: FromBackgroundRuntimeMessages) => {
-	console.log("Message sent", msg)
+	// console.log("Message sent", msg)
 	// tslint:disable-next-line:ban
 	await browser.tabs.sendMessage(tabId, msg)
 }
@@ -71,7 +71,7 @@ browser.runtime.onInstalled.addListener(async () => {
 
 // Here we receive messages from the content scripts
 browser.runtime.onMessage.addListener(async (msg: FromContentScriptRuntimeMessages, sender: Runtime.MessageSender) => {
-	console.log("Message received", msg)
+	// console.log("Message received", msg)
 	if (msg.newTab && sender.tab) {
 		await newTab(msg.newTab.websiteName, msg.newTab.url, msg.newTab.newSession, sender.tab)
 	} else if (msg.getCookies && sender.tab) {
@@ -166,7 +166,6 @@ const newTab = async (websiteName: WebsiteName, url: string, newSession: boolean
 	/*browser.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
 		if (tabId === tab.id && changeInfo.status === "complete") {
 			await new Promise((resolve) => setTimeout(() => resolve(), 1000))
-			console.log("sending", { injectCookies: { prefix } }, "to", tab.id)
 			await browser.tabs.sendMessage(tab.id, { injectCookies: { prefix } })
 		}
 	})*/
@@ -217,3 +216,7 @@ const cookieChanged = async (changeInfo: Cookies.OnChangedChangeInfoType, websit
 	}
 }
 
+// opens phantombuster in a new tab when clicking on the extension icon
+browser.browserAction.onClicked.addListener(async (_tab) => {
+	await browser.tabs.create({ url: "https://phantombuster.com" })
+})

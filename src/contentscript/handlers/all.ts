@@ -9,8 +9,8 @@ export class All extends Handler {
 
 	public onMessage(_msg: FromBackgroundRuntimeMessages) {
 		// if (msg.injectCookies) {
-		// 	injectJs(`window.injectedSwitchCookiePrefix = "${msg.injectCookies.prefix}";`)
-		// 	injectJsFile("switchCookies.js")
+		// injectJs(`window.injectedSwitchCookiePrefix = "${msg.injectCookies.prefix}";`)
+		// injectJsFile("switchCookies.js")
 		// }
 	}
 

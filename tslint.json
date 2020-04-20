@@ -10,7 +10,7 @@
 		"indent": [true, "tabs"],
 		"no-var-requires": false,
 		"variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
-		"no-console": [true, "assert", "clear", "count", "debug", "dir", "dirxml", "group", "groupCollapsed", "groupEnd", "info", "table", "time", "timeEnd", "trace", "warn"],
+		"no-console": [true, "assert", "clear", "count", "debug", "dir", "dirxml", "group", "groupCollapsed", "groupEnd", "info", "log", "table", "time", "timeEnd", "trace", "warn"],
 		"no-any": true,
 		"ordered-imports": false,
 		"max-classes-per-file": false,

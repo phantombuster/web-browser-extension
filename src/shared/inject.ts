@@ -13,3 +13,9 @@ export const injectJs = (content: string) => {
 	s.textContent = content
 	headElement.insertBefore(s, headElement.firstElementChild)
 }
+
+export const injectFunction = (func: (vals: string[]) => void, vals: string[]) => {
+	const s = document.createElement("script")
+	s.textContent = `(${func})(${JSON.stringify(vals)});`
+	headElement.insertBefore(s, headElement.firstElementChild)
+}

@@ -1,5 +1,5 @@
 import { FromBackgroundRuntimeMessages } from "../../shared/messages"
-import { getSpinner } from "../../shared/spinner"
+// import { getSpinner } from "../../shared/spinner"
 import { IWebsite, WebsiteName, getWebsiteFromUrl } from "../../shared/websites"
 import { Handler } from "./handler"
 import { Cookies } from "webextension-polyfill-ts"
@@ -29,7 +29,7 @@ export class PhantombusterOldSetup extends Handler {
 	private _alpacaFieldSessionCookieDivSelector = "div[data-alpaca-field-path*=\"/sessionCookie\"]"
 	private _alpacaFieldSessionCookieLabelASelector = "label a"
 	private _alpacaFieldSessionCookieInputSelector = "input"
-	private _getCookieButtonSelector = "button.pbExtensionButton"
+	private _getCookieButtonClass = "pbExtensionOldSetupCookieButton"
 
 	private _foundWebsites: IFoundWebsites = {}
 
@@ -61,7 +61,7 @@ export class PhantombusterOldSetup extends Handler {
 		if (this._interval) {
 			clearInterval(this._interval)
 		}
-		const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(this._getCookieButtonSelector))
+		const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(`.${this._getCookieButtonClass}`))
 		for (const button of buttons) {
 			button.remove()
 		}
@@ -81,8 +81,9 @@ export class PhantombusterOldSetup extends Handler {
 	private _websiteLogin = (foundWebsite: IFoundWebsite, newSession = false) => {
 		foundWebsite.login = true
 		for (const element of foundWebsite.elements) {
-			element.btn.textContent = "Getting Cookie"
-			element.btn.appendChild(getSpinner())
+			element.btn.textContent = `Please log in to ${foundWebsite.website.name}`
+			// element.btn.appendChild(getSpinner())
+			element.input.style.paddingRight = (element.btn.offsetWidth + 18).toString(10) + "px"
 		}
 		void this.sendMessage({ notif: { message: `Please log in to ${foundWebsite.website.name} to get your cookie` } })
 		void this.sendMessage({
@@ -122,19 +123,15 @@ export class PhantombusterOldSetup extends Handler {
 		void this.sendMessage({ notif: { message: `Your ${foundWebsite.website.name} cookie${(cookies.length > 1) ? "s have" : " has"} been pasted` } })
 	}
 
-	private _createGetCookieBtn(website: IWebsite) {
+	private _createGetCookieBtn(website: IWebsite, alpacaFieldDiv: HTMLDivElement) {
 		const el = document.createElement("button")
-		el.className = "pbExtensionButton btn"
-		// Hardcoded styles because Alpaca imposes its bootstrap style over our pb2-css classes
-		el.style.backgroundColor = "#173f53"
-		el.style.color = "#ffffff"
-		el.style.fontWeight = "700"
-		el.style.fontSize = ".875em"
-		el.style.padding = ".4rem 2rem"
-		el.style.display = "block"
-		el.style.position = "absolute"
-		el.style.right = "4px"
-		el.style.top = "28px"
+		el.className = this._getCookieButtonClass
+
+		const labelHeight = alpacaFieldDiv.querySelector<HTMLLabelElement>("label")?.offsetHeight
+		if (labelHeight) {
+			el.style.top = `${(labelHeight + 10).toString(10)}px`
+		}
+
 		el.textContent = `Get ${website.name} Cookie`
 		el.setAttribute("analyticsid", "agentSetupLegacyInputGetcookieBtn")
 		el.setAttribute("analyticsval1", website.name)
@@ -168,7 +165,7 @@ export class PhantombusterOldSetup extends Handler {
 			if (!foundWebsite) {
 				return
 			}
-			const btn = this._createGetCookieBtn(foundWebsite)
+			const btn = this._createGetCookieBtn(foundWebsite, alpacaFieldDiv)
 			const elements = { div: alpacaFieldDiv, input: alpacaFieldInput, btn }
 
 			if (!this._foundWebsites[foundWebsite.name]) {

@@ -1,5 +1,5 @@
 import { FromBackgroundRuntimeMessages } from "../../shared/messages"
-import { getSpinner } from "../../shared/spinner"
+// import { getSpinner } from "../../shared/spinner"
 import { IWebsite, WebsiteName, getWebsiteFromName } from "../../shared/websites"
 import { Handler } from "./handler"
 import { Cookies } from "webextension-polyfill-ts"
@@ -33,7 +33,7 @@ export class PhantombusterNewSetup extends Handler {
 	private _stepSetupSessionCookieDivSelector = "div[id^=\"formField-sessionCookie\"]"
 	private _stepSetupSessionCookieInnerDivSelector = "div"
 	private _stepSetupSessionCookieInputSelector = "input"
-	private _getCookieButtonSelector = "button.pbExtensionButton"
+	private _getCookieButtonClass = "pbExtensionNewSetupCookieButton"
 
 	private _foundWebsites: IFoundWebsites = {}
 
@@ -58,7 +58,7 @@ export class PhantombusterNewSetup extends Handler {
 		if (this._interval) {
 			clearInterval(this._interval)
 		}
-		const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(this._getCookieButtonSelector))
+		const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(`.${this._getCookieButtonClass}`))
 		for (const button of buttons) {
 			button.remove()
 		}
@@ -78,9 +78,9 @@ export class PhantombusterNewSetup extends Handler {
 	private _websiteLogin = (foundWebsite: IFoundWebsite, newSession = false) => {
 		foundWebsite.login = true
 		for (const element of foundWebsite.elements) {
-			element.btn.textContent = "Getting Cookie"
-			element.btn.classList.add("pr-10")
-			element.btn.appendChild(getSpinner())
+			element.btn.textContent = `Please log in to ${foundWebsite.website.name}`
+			// element.btn.classList.add("pr-10")
+			// element.btn.appendChild(getSpinner())
 		}
 		void this.sendMessage({ notif: { message: `Please log in to ${foundWebsite.website.name} to get your cookie` } })
 		void this.sendMessage({
@@ -125,7 +125,7 @@ export class PhantombusterNewSetup extends Handler {
 
 	private _createGetCookieBtn(website: IWebsite) {
 		const el = document.createElement("button")
-		el.className = "pbExtensionButton btn br-4 bg-dark-blue text-nowrap relative"
+		el.className = `${this._getCookieButtonClass} btn br-4 bg-dark-blue text-nowrap relative f5`
 		el.type = "button"
 		el.textContent = `Get ${website.name} Cookie`
 		el.setAttribute("analyticsid", "agentSetupStepsInputGetcookieBtn")
@@ -157,7 +157,6 @@ export class PhantombusterNewSetup extends Handler {
 			const cookieName = fieldInfos[1]
 
 			const foundWebsite = getWebsiteFromName(websiteName)
-			console.log(foundWebsite)
 			if (!foundWebsite) {
 				return
 			}

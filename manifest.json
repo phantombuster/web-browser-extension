@@ -14,28 +14,13 @@
 	"browser_action": {
 		"default_icon": {
 			"128": "assets/buster-icon.png"
-		},
-		"default_popup": "popup/index.html",
-		"default_title": "Phantombuster"
+		}
 	},
 	"content_scripts": [
 		{
 			"matches": [
 				"*://*.phantombuster.com/*",
-				"*://*.zapier.com/*",
-				"*://*.facebook.com/*",
-				"*://*.github.com/*",
-				"*://*.instagram.com/*",
-				"*://*.intercom.io/*",
-				"*://*.linkedin.com/*",
-				"*://*.medium.com/*",
-				"*://*.producthunt.com/*",
-				"*://*.slack.com/*",
-				"*://*.twitter.com/*",
-				"*://*.uber.com/*",
-				"*://*.youtube.com/*",
-				"*://*.quora.com/*",
-				"*://*.pinterest.com/*"
+				"*://*.zapier.com/*"
 			],
 			"run_at": "document_end",
 			"js": ["contentscript.js"],
@@ -45,7 +30,6 @@
 	"permissions": [
 		"notifications",
 		"tabs",
-		"activeTab",
 		"cookies",
 		"webRequest",
 		"webRequestBlocking",

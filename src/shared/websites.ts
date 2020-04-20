@@ -143,3 +143,11 @@ export const getWebsiteFromName = (name: WebsiteName) => {
 	}
 	return null
 }
+
+export const getWebsiteInString = (name: string) => {
+	const matchingWebsites = websites.filter((website) => name.toLowerCase().indexOf(website.name.toLowerCase()) > -1 )
+	if (matchingWebsites.length === 1) {
+		return matchingWebsites[0]
+	}
+	return null
+}
