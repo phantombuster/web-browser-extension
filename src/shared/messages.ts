@@ -31,6 +31,8 @@ type FromContentScriptRuntimeMessages = {
 		title?: string
 		message: string
 	}
+
+	restartMe?: boolean
 }
 
 export { FromBackgroundRuntimeMessages, FromContentScriptRuntimeMessages }

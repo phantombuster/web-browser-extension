@@ -82,7 +82,7 @@ export class PhantombusterNewSetup extends Handler {
 			// element.btn.classList.add("pr-10")
 			// element.btn.appendChild(getSpinner())
 		}
-		void this.sendMessage({ notif: { message: `Please log in to ${foundWebsite.website.name} to get your cookie` } })
+		void this.sendMessage({ notif: { message: `Please log in to ${foundWebsite.website.name}` } })
 		void this.sendMessage({
 			newTab: {
 				websiteName: foundWebsite.website.name,
@@ -127,7 +127,7 @@ export class PhantombusterNewSetup extends Handler {
 		const el = document.createElement("button")
 		el.className = `${this._getCookieButtonClass} btn br-4 bg-dark-blue text-nowrap relative f5`
 		el.type = "button"
-		el.textContent = `Get ${website.name} Cookie`
+		el.textContent = `Connect to ${website.name}`
 		el.setAttribute("analyticsid", "agentSetupStepsInputGetcookieBtn")
 		el.setAttribute("analyticsval1", website.name)
 
@@ -187,9 +187,9 @@ export class PhantombusterNewSetup extends Handler {
 		for (const foundWebsite of Object.values(this._foundWebsites)) {
 			if (foundWebsite) {
 				for (const elements of foundWebsite.elements) {
-					if (foundWebsite.elements.length > 1) {
-						elements.btn.textContent += "s"
-					}
+					// if (foundWebsite.elements.length > 1) {
+					// 	elements.btn.textContent += "s"
+					// }
 					elements.btn.setAttribute("originalTextContent", elements.btn.textContent!)
 					elements.innerDiv.appendChild(elements.btn)
 				}

@@ -30,7 +30,9 @@ export class ZapierCustomizeLaunch extends Handler {
 	private _spinnerDelay = 1000
 	private _hostRegex = RegExp("zapier\.com$")
 	private _pathnameRegex = RegExp("\/app\/editor\/\\d+\/nodes\/\\d+\/fields")
-	private _interval?: ReturnType<typeof setInterval>
+	private _mainInterval?: ReturnType<typeof setInterval>
+	private _phantomSelectInterval?: ReturnType<typeof setInterval>
+	private _waitBlurInterval?: ReturnType<typeof setInterval>
 	private _customizeLaunchPhantomNameSpanSelector = "div[class*=\"-FieldsForm\"] div[class*=\"-Dropdown\"] button span"
 	private _customizeLaunchSessionCookieDivXpath = "//fieldset//div[contains(@class, '-FieldsForm') and contains(.//span, 'Session Cookie')]/div"
 	private _customizeLaunchSessionCookieLabelDivSelector = "div[class*=\"-Field__revealWrapper\"]"
@@ -54,16 +56,42 @@ export class ZapierCustomizeLaunch extends Handler {
 	}
 
 	public run = async () => {
-		this._interval = setInterval(this._findCustomizeLaunchFieldSessionCookies, this._fastPoll)
+		this._mainInterval = setInterval(this._findCustomizeLaunchFieldSessionCookies, this._fastPoll)
+		this._watchPhantomSelect()
 	}
 
 	public destroy = () => {
-		if (this._interval) {
-			clearInterval(this._interval)
+		if (this._mainInterval) {
+			clearInterval(this._mainInterval)
 		}
 		const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(`.${this._getCookieButtonClass}`))
 		for (const button of buttons) {
 			button.remove()
+		}
+	}
+
+	private _waitWhileBlur = () => {
+		if (!this._waitBlurInterval) {
+			this._waitBlurInterval = setInterval(async () => {
+				const el = document.querySelector("div.flowform")
+				if (el && !el.classList.contains("loading-needs")) {
+					await this.sendMessage({ restartMe: true })
+					if (this._waitBlurInterval) {
+						clearInterval(this._waitBlurInterval)
+					}
+				}
+			}, this._fastPoll)
+		}
+	}
+
+	private _watchPhantomSelect = () => {
+		if (!this._phantomSelectInterval) {
+			this._phantomSelectInterval = setInterval(() => {
+				const floatingMenu = document.querySelector("div[class*=\"FloatingMenu\"]")
+				if (floatingMenu) {
+					floatingMenu.addEventListener("click", this._waitWhileBlur)
+				}
+			}, this._fastPoll)
 		}
 	}
 
@@ -85,7 +113,7 @@ export class ZapierCustomizeLaunch extends Handler {
 			// element.btn.classList.add("pr-10")
 			// element.btn.appendChild(getSpinner())
 		}
-		void this.sendMessage({ notif: { message: `Please log in to ${foundWebsite.website.name} to get your cookie` } })
+		void this.sendMessage({ notif: { message: `Please log in to ${foundWebsite.website.name}` } })
 		void this.sendMessage({
 			newTab: {
 				websiteName: foundWebsite.website.name,
@@ -130,7 +158,7 @@ export class ZapierCustomizeLaunch extends Handler {
 		const el = document.createElement("button")
 		el.className = this._getCookieButtonClass
 		el.type = "button"
-		el.textContent = `Get ${website.name} Cookie`
+		el.textContent = `Connet to ${website.name}`
 		el.setAttribute("analyticsid", "agentSetupStepsInputGetcookieBtn")
 		el.setAttribute("analyticsval1", website.name)
 
@@ -193,8 +221,8 @@ export class ZapierCustomizeLaunch extends Handler {
 		const customizeLaunchDivs = this._getCustomizeLaunchDivs()
 		const website = this._findWebsite()
 
-		if (this._interval && customizeLaunchDivs.length && website) {
-			clearInterval(this._interval)
+		if (this._mainInterval && customizeLaunchDivs.length && website) {
+			clearInterval(this._mainInterval)
 		} else {
 			return
 		}
@@ -207,9 +235,9 @@ export class ZapierCustomizeLaunch extends Handler {
 		for (const foundWebsite of Object.values(this._foundWebsites)) {
 			if (foundWebsite) {
 				for (const elements of foundWebsite.elements) {
-					if (foundWebsite.elements.length > 1) {
-						elements.btn.textContent += "s"
-					}
+					// if (foundWebsite.elements.length > 1) {
+					// 	elements.btn.textContent += "s"
+					// }
 					elements.btn.setAttribute("originalTextContent", elements.btn.textContent!)
 					elements.div.parentNode?.insertBefore(elements.btn, elements.div.nextSibling)
 				}

@@ -85,7 +85,7 @@ export class PhantombusterOldSetup extends Handler {
 			// element.btn.appendChild(getSpinner())
 			element.input.style.paddingRight = (element.btn.offsetWidth + 18).toString(10) + "px"
 		}
-		void this.sendMessage({ notif: { message: `Please log in to ${foundWebsite.website.name} to get your cookie` } })
+		void this.sendMessage({ notif: { message: `Please log in to ${foundWebsite.website.name}` } })
 		void this.sendMessage({
 			newTab: {
 				websiteName: foundWebsite.website.name,
@@ -132,7 +132,7 @@ export class PhantombusterOldSetup extends Handler {
 			el.style.top = `${(labelHeight + 10).toString(10)}px`
 		}
 
-		el.textContent = `Get ${website.name} Cookie`
+		el.textContent = `Connect to ${website.name}`
 		el.setAttribute("analyticsid", "agentSetupLegacyInputGetcookieBtn")
 		el.setAttribute("analyticsval1", website.name)
 
@@ -192,10 +192,10 @@ export class PhantombusterOldSetup extends Handler {
 		for (const foundWebsite of Object.values(this._foundWebsites)) {
 			if (foundWebsite) {
 				for (const elements of foundWebsite.elements) {
-					if (foundWebsite.elements.length > 1) {
-						elements.btn.textContent += "s"
-					}
-					elements.btn.setAttribute("originalTextContent", elements.btn.textContent!)
+					// if (foundWebsite.elements.length > 1) {
+					// 	elements.btn.textContent += "s"
+					// }
+					// elements.btn.setAttribute("originalTextContent", elements.btn.textContent!)
 
 					elements.div.style.position = "relative"
 					elements.div.insertBefore(elements.btn, elements.input)
