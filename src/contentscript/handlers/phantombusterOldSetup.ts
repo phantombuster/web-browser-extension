@@ -193,9 +193,9 @@ export class PhantombusterOldSetup extends Handler {
 			if (foundWebsite) {
 				for (const elements of foundWebsite.elements) {
 					// if (foundWebsite.elements.length > 1) {
-					// 	elements.btn.textContent += "s"
+					// elements.btn.textContent += "s"
 					// }
-					// elements.btn.setAttribute("originalTextContent", elements.btn.textContent!)
+					elements.btn.setAttribute("originalTextContent", elements.btn.textContent!)
 
 					elements.div.style.position = "relative"
 					elements.div.insertBefore(elements.btn, elements.input)
