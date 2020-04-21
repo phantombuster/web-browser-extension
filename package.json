@@ -5,10 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"build:contentscript-background": "NODE_ENV=production webpack --config webpack.config.js",
-		"build:popup": "INLINE_RUNTIME_CHUNK=false npm run build --prefix src/popup && cd src/popup/build && cpy * /static/* ../../../dist/popup --parents",
 		"build": "npm-run-all build:*",
 		"watch:contentscript-background": "NODE_ENV=development webpack --config webpack.config.js -w",
-		"watch:popup": "npm run watch:build --prefix src/popup",
 		"watch": "npm-run-all -p watch:*",
 		"clean": "rm -rf dist extension.zip && cpy manifest.json dist && cpy src/assets/* dist/assets",
 		"prebuild": "npm run clean",
