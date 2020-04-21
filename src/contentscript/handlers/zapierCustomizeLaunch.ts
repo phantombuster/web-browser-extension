@@ -151,7 +151,7 @@ export class ZapierCustomizeLaunch extends Handler {
 				foundWebsite.elements[i].codeMirrorDiv.querySelector("textarea")?.addEventListener("input", foundWebsite.elements[i].inputListener!)
 			}
 		}
-		void this.sendMessage({ notif: { message: `Your Phantom is now connected to ${foundWebsite.website.name}` } })
+		void this.sendMessage({ notif: { message: `Connected to ${foundWebsite.website.name}` } })
 	}
 
 	private _createGetCookieBtn(website: IWebsite) {

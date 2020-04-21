@@ -34,7 +34,10 @@ export class PhantombusterNewSetup extends Handler {
 	private _stepSetupSessionCookieInnerDivSelector = "div"
 	private _stepSetupSessionCookieInputSelector = "input"
 	private _getCookieButtonClass = "pbExtensionNewSetupCookieButton"
+	private _phantomNameSelector1 = "header p"
+	private _phantomNameSelector2 = "aside header span"
 
+	private _phantomName: string = ""
 	private _foundWebsites: IFoundWebsites = {}
 
 	public detect = () => {
@@ -120,7 +123,7 @@ export class PhantombusterNewSetup extends Handler {
 				foundWebsite.elements[i].input.addEventListener("input", foundWebsite.elements[i].inputListener!)
 			}
 		}
-		void this.sendMessage({ notif: { message: `Your Phantom is now connected to ${foundWebsite.website.name}` } })
+		void this.sendMessage({ notif: { message: `${this._phantomName} is now connected to ${foundWebsite.website.name}` } })
 	}
 
 	private _createGetCookieBtn(website: IWebsite) {
@@ -171,6 +174,14 @@ export class PhantombusterNewSetup extends Handler {
 		}
 	}
 
+	private _setPhantomName = () => {
+		let phantomName = document.querySelector<HTMLParagraphElement>(this._phantomNameSelector1)?.textContent
+		if (!phantomName || phantomName.trim() === "Setup") {
+			phantomName = document.querySelector<HTMLSpanElement>(this._phantomNameSelector2)?.textContent
+		}
+		this._phantomName = phantomName || ""
+	}
+
 	private _findStepSetupFieldSessionCookies = () => {
 		const stepSetupDivs = Array.from(document.querySelectorAll<HTMLDivElement>(this._stepSetupSessionCookieDivSelector))
 
@@ -183,6 +194,8 @@ export class PhantombusterNewSetup extends Handler {
 		for (const stepSetupDiv of stepSetupDivs) {
 			this._handleStepSetupFieldDiv(stepSetupDiv)
 		}
+
+		this._setPhantomName()
 
 		for (const foundWebsite of Object.values(this._foundWebsites)) {
 			if (foundWebsite) {

@@ -30,7 +30,10 @@ export class PhantombusterOldSetup extends Handler {
 	private _alpacaFieldSessionCookieLabelASelector = "label a"
 	private _alpacaFieldSessionCookieInputSelector = "input"
 	private _getCookieButtonClass = "pbExtensionOldSetupCookieButton"
+	private _phantomNameSelector1 = "header p"
+	private _phantomNameSelector2 = "aside header span"
 
+	private _phantomName: string = ""
 	private _foundWebsites: IFoundWebsites = {}
 
 	public detect = () => {
@@ -116,7 +119,7 @@ export class PhantombusterOldSetup extends Handler {
 				foundWebsite.elements[i].input.addEventListener("input", () => { this._onInputChange(foundWebsite.elements) })
 			}
 		}
-		void this.sendMessage({ notif: { message: `Your Phantom is now connected to ${foundWebsite.website.name}` } })
+		void this.sendMessage({ notif: { message: `${this._phantomName} is now connected to ${foundWebsite.website.name}` } })
 	}
 
 	private _createGetCookieBtn(website: IWebsite, alpacaFieldDiv: HTMLDivElement) {
@@ -172,6 +175,14 @@ export class PhantombusterOldSetup extends Handler {
 		}
 	}
 
+	private _setPhantomName = () => {
+		let phantomName = document.querySelector<HTMLParagraphElement>(this._phantomNameSelector1)?.textContent
+		if (!phantomName || phantomName.trim() === "Setup") {
+			phantomName = document.querySelector<HTMLSpanElement>(this._phantomNameSelector2)?.textContent
+		}
+		this._phantomName = phantomName || ""
+	}
+
 	private _findAlpacaFieldSessionCookies = () => {
 		const alpacaFieldDivs = Array.from(document.querySelectorAll<HTMLDivElement>(this._alpacaFieldSessionCookieDivSelector))
 
@@ -184,6 +195,8 @@ export class PhantombusterOldSetup extends Handler {
 		for (const alpacaFieldDiv of alpacaFieldDivs) {
 			this._handleAlpacaFieldDiv(alpacaFieldDiv)
 		}
+
+		this._setPhantomName()
 
 		for (const foundWebsite of Object.values(this._foundWebsites)) {
 			if (foundWebsite) {
