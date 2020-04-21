@@ -106,7 +106,7 @@ export class PhantombusterNewSetup extends Handler {
 		}
 		for (const i in cookies) {
 			if (cookies[i] && foundWebsite.elements[i]) {
-				foundWebsite.elements[i].btn.textContent = "Cookie Pasted"
+				foundWebsite.elements[i].btn.textContent = `Connected to ${foundWebsite.website.name}`
 				foundWebsite.elements[i].btn.classList.remove("pr-10")
 				foundWebsite.elements[i].btn.disabled = true
 				foundWebsite.elements[i].input.value = cookies[i].value
@@ -120,7 +120,7 @@ export class PhantombusterNewSetup extends Handler {
 				foundWebsite.elements[i].input.addEventListener("input", foundWebsite.elements[i].inputListener!)
 			}
 		}
-		void this.sendMessage({ notif: { message: `Your ${foundWebsite.website.name} cookie${(cookies.length > 1) ? "s have" : " has"} been pasted` } })
+		void this.sendMessage({ notif: { message: `Your Phantom is now connected to ${foundWebsite.website.name}` } })
 	}
 
 	private _createGetCookieBtn(website: IWebsite) {
@@ -188,7 +188,7 @@ export class PhantombusterNewSetup extends Handler {
 			if (foundWebsite) {
 				for (const elements of foundWebsite.elements) {
 					// if (foundWebsite.elements.length > 1) {
-					// 	elements.btn.textContent += "s"
+					// elements.btn.textContent += "s"
 					// }
 					elements.btn.setAttribute("originalTextContent", elements.btn.textContent!)
 					elements.innerDiv.appendChild(elements.btn)

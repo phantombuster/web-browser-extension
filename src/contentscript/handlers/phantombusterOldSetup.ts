@@ -95,13 +95,9 @@ export class PhantombusterOldSetup extends Handler {
 		})
 	}
 
-	private _enableButton = (btn: HTMLButtonElement) => {
-		btn.disabled = false
-	}
-
 	private _onInputChange = (elements: IElement[]) => {
 		for (const element of elements) {
-			this._enableButton(element.btn)
+			element.btn.disabled = false
 			element.btn.textContent = element.btn.getAttribute("originalTextContent")
 			element.input.style.paddingRight = (element.btn.offsetWidth + 18).toString(10) + "px"
 		}
@@ -113,14 +109,14 @@ export class PhantombusterOldSetup extends Handler {
 		}
 		for (const i in cookies) {
 			if (cookies[i] && foundWebsite.elements[i]) {
-				foundWebsite.elements[i].btn.textContent = "Cookie Pasted"
+				foundWebsite.elements[i].btn.textContent = `Connected to ${foundWebsite.website.name}`
 				foundWebsite.elements[i].input.style.paddingRight = (foundWebsite.elements[i].btn.offsetWidth + 18).toString(10) + "px"
 				foundWebsite.elements[i].input.value = cookies[i].value
 				foundWebsite.elements[i].btn.disabled = true
 				foundWebsite.elements[i].input.addEventListener("input", () => { this._onInputChange(foundWebsite.elements) })
 			}
 		}
-		void this.sendMessage({ notif: { message: `Your ${foundWebsite.website.name} cookie${(cookies.length > 1) ? "s have" : " has"} been pasted` } })
+		void this.sendMessage({ notif: { message: `Your Phantom is now connected to ${foundWebsite.website.name}` } })
 	}
 
 	private _createGetCookieBtn(website: IWebsite, alpacaFieldDiv: HTMLDivElement) {
