@@ -68,6 +68,8 @@ export class PhantombusterOldSetup extends Handler {
 		for (const button of buttons) {
 			button.remove()
 		}
+		document.removeEventListener("keydown", this._keydownListener)
+		document.removeEventListener("keyup", this._keyupListener)
 	}
 
 	private _onMessageCookies = (websiteName: WebsiteName, cookies: Cookies.Cookie[], newSession = false) => {
@@ -101,7 +103,7 @@ export class PhantombusterOldSetup extends Handler {
 	private _onInputChange = (elements: IElement[]) => {
 		for (const element of elements) {
 			element.btn.disabled = false
-			element.btn.textContent = element.btn.getAttribute("originalTextContent")
+			element.btn.textContent = element.btn.getAttribute("textContentConnect")
 			element.input.style.paddingRight = (element.btn.offsetWidth + 18).toString(10) + "px"
 		}
 	}
@@ -131,9 +133,13 @@ export class PhantombusterOldSetup extends Handler {
 			el.style.top = `${(labelHeight + 10).toString(10)}px`
 		}
 
-		el.textContent = `Connect to ${website.name}`
 		el.setAttribute("analyticsid", "agentSetupLegacyInputGetcookieBtn")
 		el.setAttribute("analyticsval1", website.name)
+
+		el.setAttribute("textContentConnect", `Connect to ${website.name}`)
+		el.setAttribute("textContentLogin", `Connect to ${website.name} (new session)`)
+
+		el.textContent = el.getAttribute("textContentConnect")
 
 		if (document.querySelector<HTMLDivElement>("body > #root > div")?.dataset.loggedAs === "true") {
 			el.disabled = true
@@ -145,6 +151,26 @@ export class PhantombusterOldSetup extends Handler {
 						newSession: event.shiftKey,
 					}
 				})
+			}
+			el.onmouseover = (event: MouseEvent) => {
+				if (event.target instanceof HTMLButtonElement) {
+					event.target.setAttribute("hover", "true")
+					if (event.shiftKey === true) {
+						event.target.textContent = event.target.getAttribute("textContentLogin")
+						if (event.target.nextSibling instanceof HTMLInputElement) {
+							event.target.nextSibling.style.paddingRight = (event.target.offsetWidth + 18).toString(10) + "px"
+						}
+					}
+				}
+			}
+			el.onmouseout = (event: MouseEvent) => {
+				if (event.target instanceof HTMLButtonElement) {
+					event.target.removeAttribute("hover")
+					event.target.textContent = event.target.getAttribute("textContentConnect")
+					if (event.target.nextSibling instanceof HTMLInputElement) {
+						event.target.nextSibling.style.paddingRight = (event.target.offsetWidth + 18).toString(10) + "px"
+					}
+				}
 			}
 		}
 
@@ -183,6 +209,34 @@ export class PhantombusterOldSetup extends Handler {
 		this._phantomName = phantomName || ""
 	}
 
+	private _keydownListener = (event: KeyboardEvent) => {
+		if (event.key === "Shift") {
+			const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(`.${this._getCookieButtonClass}`))
+			for (const button of buttons) {
+				if (button.hasAttribute("hover")) {
+					button.textContent = button.getAttribute("textContentLogin")
+					if (button.nextSibling instanceof HTMLInputElement) {
+						button.nextSibling.style.paddingRight = (button.offsetWidth + 18).toString(10) + "px"
+					}
+				}
+			}
+		}
+	}
+
+	private _keyupListener = (event: KeyboardEvent) => {
+		if (event.key === "Shift") {
+			const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(`.${this._getCookieButtonClass}`))
+			for (const button of buttons) {
+				if (button.hasAttribute("hover")) {
+					button.textContent = button.getAttribute("textContentConnect")
+					if (button.nextSibling instanceof HTMLInputElement) {
+						button.nextSibling.style.paddingRight = (button.offsetWidth + 18).toString(10) + "px"
+					}
+				}
+			}
+		}
+	}
+
 	private _findAlpacaFieldSessionCookies = () => {
 		const alpacaFieldDivs = Array.from(document.querySelectorAll<HTMLDivElement>(this._alpacaFieldSessionCookieDivSelector))
 
@@ -201,15 +255,13 @@ export class PhantombusterOldSetup extends Handler {
 		for (const foundWebsite of Object.values(this._foundWebsites)) {
 			if (foundWebsite) {
 				for (const elements of foundWebsite.elements) {
-					// if (foundWebsite.elements.length > 1) {
-					// elements.btn.textContent += "s"
-					// }
-					elements.btn.setAttribute("originalTextContent", elements.btn.textContent!)
-
 					elements.div.style.position = "relative"
 					elements.div.insertBefore(elements.btn, elements.input)
 					elements.input.style.paddingRight = ((elements.btn.offsetWidth || 200) + 18).toString(10) + "px"
 				}
+
+				document.addEventListener("keydown", this._keydownListener)
+				document.addEventListener("keyup", this._keyupListener)
 			}
 		}
 	}

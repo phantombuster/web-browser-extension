@@ -65,6 +65,8 @@ export class PhantombusterNewSetup extends Handler {
 		for (const button of buttons) {
 			button.remove()
 		}
+		document.removeEventListener("keydown", this._keydownListener)
+		document.removeEventListener("keyup", this._keyupListener)
 	}
 
 	private _onMessageCookies = (websiteName: WebsiteName, cookies: Cookies.Cookie[], newSession = false) => {
@@ -98,7 +100,7 @@ export class PhantombusterNewSetup extends Handler {
 	private _onInputChange = (elements: IElement[]) => {
 		for (const element of elements) {
 			element.btn.disabled = false
-			element.btn.textContent = element.btn.getAttribute("originalTextContent")
+			element.btn.textContent = element.btn.getAttribute("textContentConnect")
 		}
 	}
 
@@ -128,11 +130,15 @@ export class PhantombusterNewSetup extends Handler {
 
 	private _createGetCookieBtn(website: IWebsite) {
 		const el = document.createElement("button")
-		el.className = `${this._getCookieButtonClass} btn br-4 bg-dark-blue text-nowrap relative f5`
+		el.className = `${this._getCookieButtonClass} btn br-4 bg-dark-blue text-nowrap relative f5 mx-1 my-1`
 		el.type = "button"
-		el.textContent = `Connect to ${website.name}`
 		el.setAttribute("analyticsid", "agentSetupStepsInputGetcookieBtn")
 		el.setAttribute("analyticsval1", website.name)
+
+		el.setAttribute("textContentConnect", `Connect to ${website.name}`)
+		el.setAttribute("textContentLogin", `Connect to ${website.name} (new session)`)
+
+		el.textContent = el.getAttribute("textContentConnect")
 
 		if (document.querySelector<HTMLDivElement>("body > #root > div")?.dataset.loggedAs === "true") {
 			el.disabled = true
@@ -144,6 +150,20 @@ export class PhantombusterNewSetup extends Handler {
 						newSession: event.shiftKey,
 					}
 				})
+			}
+			el.onmouseover = (event: MouseEvent) => {
+				if (event.target instanceof HTMLButtonElement) {
+					event.target.setAttribute("hover", "true")
+					if (event.shiftKey === true) {
+						event.target.textContent = event.target.getAttribute("textContentLogin")
+					}
+				}
+			}
+			el.onmouseout = (event: MouseEvent) => {
+				if (event.target instanceof HTMLButtonElement) {
+					event.target.removeAttribute("hover")
+					event.target.textContent = event.target.getAttribute("textContentConnect")
+				}
 			}
 		}
 
@@ -182,6 +202,28 @@ export class PhantombusterNewSetup extends Handler {
 		this._phantomName = phantomName || ""
 	}
 
+	private _keydownListener = (event: KeyboardEvent) => {
+		if (event.key === "Shift") {
+			const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(`.${this._getCookieButtonClass}`))
+			for (const button of buttons) {
+				if (button.hasAttribute("hover")) {
+					button.textContent = button.getAttribute("textContentLogin")
+				}
+			}
+		}
+	}
+
+	private _keyupListener = (event: KeyboardEvent) => {
+		if (event.key === "Shift") {
+			const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(`.${this._getCookieButtonClass}`))
+			for (const button of buttons) {
+				if (button.hasAttribute("hover")) {
+					button.textContent = button.getAttribute("textContentConnect")
+				}
+			}
+		}
+	}
+
 	private _findStepSetupFieldSessionCookies = () => {
 		const stepSetupDivs = Array.from(document.querySelectorAll<HTMLDivElement>(this._stepSetupSessionCookieDivSelector))
 
@@ -200,12 +242,11 @@ export class PhantombusterNewSetup extends Handler {
 		for (const foundWebsite of Object.values(this._foundWebsites)) {
 			if (foundWebsite) {
 				for (const elements of foundWebsite.elements) {
-					// if (foundWebsite.elements.length > 1) {
-					// elements.btn.textContent += "s"
-					// }
-					elements.btn.setAttribute("originalTextContent", elements.btn.textContent!)
 					elements.innerDiv.appendChild(elements.btn)
 				}
+
+				document.addEventListener("keydown", this._keydownListener)
+				document.addEventListener("keyup", this._keyupListener)
 			}
 		}
 	}

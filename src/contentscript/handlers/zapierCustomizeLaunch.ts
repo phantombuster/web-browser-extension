@@ -236,7 +236,7 @@ export class ZapierCustomizeLaunch extends Handler {
 			if (foundWebsite) {
 				for (const elements of foundWebsite.elements) {
 					// if (foundWebsite.elements.length > 1) {
-					//	elements.btn.textContent += "s"
+					// elements.btn.textContent += "s"
 					// }
 					elements.btn.setAttribute("originalTextContent", elements.btn.textContent!)
 					elements.div.parentNode?.insertBefore(elements.btn, elements.div.nextSibling)

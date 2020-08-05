@@ -1,6 +1,6 @@
 {
 	"name": "phantombuster-browser-extension",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "Phantombuster Browser Extension",
 	"main": "index.js",
 	"scripts": {
