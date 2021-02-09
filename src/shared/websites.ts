@@ -16,7 +16,7 @@ export const extensionWebsiteDomains = [
 	// "pinterest.com",
 ]
 
-export type WebsiteName = "Facebook" | "GitHub" | "Instagram" | "Intercom" | "Quora" | "LinkedIn" | "Medium" | "Pinterest" | "Product Hunt" | "Slack" | "Twitter" | "Uber" | "Youtube"
+export type WebsiteName = "Facebook" | "GitHub" | "Instagram" | "Intercom" | "Quora" | "LinkedIn" | "Medium" | "Pinterest" | "Product Hunt" | "Slack" | "Twitter" | "Uber" | "Youtube" | "TikTok"
 
 export interface IWebsite {
 	match: string
@@ -125,7 +125,14 @@ export const websites: IWebsite[] = [
 			{ name: "SID", domain: ".youtube.com"},
 			{ name: "SSID", domain: ".youtube.com"}
 		]
-	},
+	}, {
+		name: "TikTok",
+		match: "/tiktok",
+		url: "https://www.tiktok.com/",
+		cookies: [
+			{ name: "sessionid", domain: ".tiktok.com" }
+		]
+	}
 ]
 
 export const getWebsiteFromUrl = (url: string) => {

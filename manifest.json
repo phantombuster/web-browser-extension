@@ -47,7 +47,8 @@
 		"*://*.uber.com/*",
 		"*://*.youtube.com/*",
 		"*://*.quora.com/*",
-		"*://*.pinterest.com/*"
+		"*://*.pinterest.com/*",
+		"*://*.tiktok.com/*"
 	],
 	"web_accessible_resources": ["assets/*"]
 }
