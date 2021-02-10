@@ -34,21 +34,10 @@
 		"cookies",
 		"webRequest",
 		"webRequestBlocking",
-		"*://*.phantombuster.com/*",
-		"*://*.facebook.com/*",
-		"*://*.github.com/*",
-		"*://*.instagram.com/*",
-		"*://*.intercom.io/*",
-		"*://*.linkedin.com/*",
-		"*://*.medium.com/*",
-		"*://*.producthunt.com/*",
-		"*://*.slack.com/*",
-		"*://*.twitter.com/*",
-		"*://*.uber.com/*",
-		"*://*.youtube.com/*",
-		"*://*.quora.com/*",
-		"*://*.pinterest.com/*",
-		"*://*.tiktok.com/*"
+		"*://*.phantombuster.com/*"
+	],
+	"optional_permissions": [
+		"<all_urls>"
 	],
 	"web_accessible_resources": ["assets/*"]
 }

@@ -21,6 +21,7 @@ export type WebsiteName = "Facebook" | "GitHub" | "Instagram" | "Intercom" | "Qu
 export interface IWebsite {
 	match: string
 	name: WebsiteName
+	host: string
 	url: string
 	cookies: {
 		name: string
@@ -32,6 +33,7 @@ export const websites: IWebsite[] = [
 	{
 		name: "Facebook",
 		match: "/facebook",
+		host: "*://*.facebook.com/*",
 		url: "https://www.facebook.com/",
 		cookies: [
 			{ name: "c_user", domain: ".facebook.com" },
@@ -40,6 +42,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "GitHub",
 		match: "/github",
+		host: "*://*.github.com/*",
 		url: "https://github.com/",
 		cookies: [
 			{ name: "user_session", domain: "github.com" }
@@ -47,6 +50,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "Instagram",
 		match: "/instagram",
+		host: "*://*.instagram.com/*",
 		url: "https://www.instagram.com/",
 		cookies: [
 			{ name: "sessionid", domain: ".instagram.com" }
@@ -54,6 +58,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "Intercom",
 		match: "/intercom",
+		host: "*://*.intercom.io/*",
 		url: "https://app.intercom.io",
 		cookies: [
 			{ name: "_intercom_session", domain: "app.intercom.io" }
@@ -61,6 +66,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "Quora",
 		match: "/quora",
+		host: "*://*.quora.com/*",
 		url: "https://quora.com",
 		cookies: [
 			{ name: "m-b", domain: ".quora.com" }
@@ -68,6 +74,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "LinkedIn",
 		match: "/linkedin",
+		host: "*://*.linkedin.com/*",
 		url: "https://www.linkedin.com/",
 		cookies: [
 			{ name: "li_at", domain: ".www.linkedin.com" }
@@ -75,6 +82,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "Medium",
 		match: "/medium",
+		host: "*://*.medium.com/*",
 		url: "https://www.medium.com",
 		cookies: [
 			{ name: "uid", domain: ".medium.com" },
@@ -83,6 +91,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "Pinterest",
 		match: "/pinterest",
+		host: "*://*.pinterest.com/*",
 		url: "https://pinterest.com",
 		cookies: [
 			{ name: "_pinterest_sess", domain: ".pinterest.com" }
@@ -90,6 +99,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "Product Hunt",
 		match: "/product-hunt",
+		host: "*://*.producthunt.com/*",
 		url: "https://www.producthunt.com",
 		cookies: [
 			{ name: "_producthunt_session_production", domain: ".producthunt.com" }
@@ -97,6 +107,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "Slack",
 		match: "/slack",
+		host: "*://*.slack.com/*",
 		url: "https://www.slack.com",
 		cookies: [
 			{ name: "d", domain: ".slack.com" }
@@ -104,6 +115,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "Twitter",
 		match: "/twitter",
+		host: "*://*.twitter.com/*",
 		url: "https://twitter.com/",
 		cookies: [
 			{ name: "auth_token", domain: ".twitter.com" }
@@ -111,6 +123,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "Uber",
 		match: "/uber",
+		host: "*://*.uber.com/*",
 		url: "https://riders.uber.com",
 		cookies: [
 			{ name: "csid", domain: ".riders.uber.com"},
@@ -119,6 +132,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "Youtube",
 		match: "/youtube",
+		host: "*://*.youtube.com/*",
 		url: "https://www.youtube.com",
 		cookies: [
 			{ name: "HSID", domain: ".youtube.com" },
@@ -128,6 +142,7 @@ export const websites: IWebsite[] = [
 	}, {
 		name: "TikTok",
 		match: "/tiktok",
+		host: "*://*.tiktok.com/*",
 		url: "https://www.tiktok.com/",
 		cookies: [
 			{ name: "sessionid", domain: ".tiktok.com" }

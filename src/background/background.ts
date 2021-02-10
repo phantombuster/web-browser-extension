@@ -69,13 +69,33 @@ browser.runtime.onInstalled.addListener(async () => {
 	}
 })
 
+// If we are on chrome, and we want either to open a new tab or get cookies,
+// we need to request permissions for the host.
+const requestHostPermissions = async (websiteName: WebsiteName) => {
+	const host = getWebsiteFromName(websiteName)?.host
+	if (host && isChrome()) {
+		return browser.permissions.request({
+			origins: [host]
+		})
+	} else {
+		// If not on chrome (firefox) we already have permissions for all hosts
+		return true
+	}
+}
+
 // Here we receive messages from the content scripts
 browser.runtime.onMessage.addListener(async (msg: FromContentScriptRuntimeMessages, sender: Runtime.MessageSender) => {
 	// console.log("Message received", msg)
 	if (msg.newTab && sender.tab) {
-		await newTab(msg.newTab.websiteName, msg.newTab.url, msg.newTab.newSession, sender.tab)
+		const gotPermission = await requestHostPermissions(msg.newTab.websiteName)
+		if (gotPermission) {
+			await newTab(msg.newTab.websiteName, msg.newTab.url, msg.newTab.newSession, sender.tab)
+		}
 	} else if (msg.getCookies && sender.tab) {
-		await getCookies(msg.getCookies.websiteName, msg.getCookies.newSession, sender.tab)
+		const gotPermission = await requestHostPermissions(msg.getCookies.websiteName)
+		if (gotPermission) {
+			await getCookies(msg.getCookies.websiteName, msg.getCookies.newSession, sender.tab)
+		}
 	} else if (msg.notif) {
 		sendNotification(msg.notif.title || "Phantombuster", msg.notif.message)
 	} else if (msg.restartMe && sender.tab && sender.tab.id) {
